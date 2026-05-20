@@ -1,0 +1,10 @@
+{
+	"id": "conflict-manager",
+	"name": "Conflict Manager",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "",
+	"author": "Armen Abrahamyan",
+	"authorUrl": "https://github.com/Demigoddd",
+	"isDesktopOnly": false
+}

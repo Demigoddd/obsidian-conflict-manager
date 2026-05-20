@@ -1,0 +1,56 @@
+.theme-light {
+  --banner-background: #fffad6;
+  --banner-text-color: #5c4400;
+}
+
+.theme-dark {
+  --banner-background: #3d2e00;
+  --banner-text-color: #f5c842;
+}
+
+/* Conflict Manager banner styles */
+.conflict-manager-banner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background-color: var(--banner-background);
+
+  .icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    svg {
+      color: var(--banner-text-color);
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .button {
+    color: var(--banner-text-color);
+    cursor: pointer;
+  }
+
+  .message {
+    color: var(--banner-text-color);
+    font-size: 16px;
+  }
+}
+
+/* Conflict Manager view styles */
+.conflict-manager-workspace {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--background-primary);
+}
