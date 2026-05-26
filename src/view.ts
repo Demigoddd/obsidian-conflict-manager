@@ -1,0 +1,137 @@
+import { ItemView, WorkspaceLeaf, TFile, setIcon, Notice } from 'obsidian';
+import { UnifiedDiff } from 'components/unified-diff';
+import { DeleteConfirmModal } from 'components/delete-confirm-modal';
+
+export const CONFLICT_MANAGER_VIEW_TYPE = "conflict-manager-view";
+
+export class ConflictManagerView extends ItemView {
+    private mainFile: TFile | null = null;
+    private conflictFileAll: TFile[] = [];
+    private currentIdx: number = -1;
+    private updateNavInfo: () => void;
+
+    constructor(leaf: WorkspaceLeaf) {
+        super(leaf);
+        this.updateNavInfo = () => {};
+    }
+
+    getViewType() { return CONFLICT_MANAGER_VIEW_TYPE; }
+    getDisplayText() { return "Conflict Manager"; } // eslint-disable-line
+
+    setFiles(main: TFile, conflicts: TFile[]) {
+        this.mainFile = main;
+        this.conflictFileAll = conflicts;
+        this.currentIdx = conflicts.length > 0 ? 0 : -1;
+        void this.onOpen();
+    }
+
+    async onOpen() {
+        // Container init
+        const container = this.containerEl.children[1];
+        if (!container) return;
+        container.empty();
+        container.addClass('conflict-manager-view');
+        if (!this.mainFile) return void container.createEl('h4', { text: "No conflicts", cls: "empty-text" });
+
+        // Navigation
+        const navigation = container.createDiv({ cls: 'navigation' });
+        this.buildNav(navigation);
+
+        // View
+        container.createDiv({ cls: 'view' });
+        await this.renderDiff();
+
+        // Listening to changes in the main file for updating conflict file
+        this.registerEvent(this.app.metadataCache.on('changed', (file: TFile) => file === this.mainFile && void this.renderDiff()));
+    }
+
+    private buildNav(navigation: HTMLElement) {
+        // Previous button
+        const prev = navigation.createEl('button', { cls: 'previous-button' });
+        setIcon(prev, 'chevron-left');
+        prev.onclick = () => this.navigate(-1);
+
+        // Info content
+        const info = navigation.createDiv({ cls: 'info' });
+
+        // Next button
+        const nextButton = navigation.createEl('button', { cls: 'next-button' });
+        setIcon(nextButton, 'chevron-right');
+        nextButton.onclick = () => this.navigate(1);
+
+        // Delete button
+        const deleteButton = navigation.createEl('button', { cls: 'delete-button' });
+        setIcon(deleteButton, 'trash-2');
+        deleteButton.onclick = () => this.deleteCurrent();
+
+        // Update
+        this.updateNavInfo = () => {
+            const total = this.conflictFileAll.length;
+            const name = this.conflictFileAll[this.currentIdx]?.name ?? 'Unknown';
+            info.setText(total ? `${this.currentIdx + 1}/${total} - ${name}` : 'No conflicts');
+        };
+        this.updateNavInfo();
+    }
+
+    private navigate(delta: number) {
+        const newIdx = this.currentIdx + delta;
+
+        if (newIdx < 0 || newIdx >= this.conflictFileAll.length) return;
+
+        this.currentIdx = newIdx;
+
+        this.updateNavInfo?.();
+        void this.renderDiff();
+    }
+
+    private async deleteCurrent() {
+        const file = this.conflictFileAll[this.currentIdx];
+
+        if (!file) return;
+
+        new DeleteConfirmModal(this.app, file.name, () => {
+            void (async () => {
+                try {
+                    await this.app.fileManager.trashFile(file);
+                    new Notice(`Moved ${file.name} to trash`);
+                } catch {
+                    new Notice('Failed to move file to trash');
+                    return;
+                }
+
+                this.conflictFileAll.splice(this.currentIdx, 1);
+
+                if (this.conflictFileAll.length === 0) {
+                    this.containerEl.children[1]?.empty();
+                    this.containerEl.children[1]?.createEl('h4', { text: "All conflicts resolved", cls: "empty-text"  });
+                    return;
+                }
+
+                if (this.currentIdx >= this.conflictFileAll.length) {
+                    this.currentIdx = this.conflictFileAll.length - 1;
+                }
+
+                this.updateNavInfo?.();
+                void this.renderDiff();
+            })();
+        }).open();
+    }
+
+    private async renderDiff() {
+        const container = this.containerEl.children[1];
+        if (!container) return;
+
+        const view = container.querySelector('.view') as HTMLElement;
+        if (!view) return;
+
+        const conflictFile = this.conflictFileAll[this.currentIdx];
+        if (!this.mainFile || !conflictFile) return;
+
+        const [mainText, conflictText] = await Promise.all([
+            this.app.vault.cachedRead(this.mainFile),
+            this.app.vault.cachedRead(conflictFile),
+        ]);
+
+        UnifiedDiff.render(view, mainText, conflictText);
+    }
+}

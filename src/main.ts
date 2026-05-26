@@ -12,20 +12,29 @@ export default class ConflictManager extends Plugin {
         this.settings = { ...DEFAULT_SETTINGS, ...(await this.loadData() as Partial<ConflictManagerSettings>) };
 		this.addSettingTab(new ConflictManagerSettingTab(this.app, this));
 
-        // Conflict notifier
-        this.notifier = new ConflictManagerNotifier((mainFile, conflictFiles) => void this.activateView(mainFile, conflictFiles));
-        this.registerEvent(
-            this.app.workspace.on('file-open', (file: TFile | null) => {
-                if (!file) return;
-                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-                if (view) this.notifier.checkAndNotifyConflicts(this.settings, file, view);
-            })
-        );
-
         // Conflict view
         this.registerView(
             CONFLICT_MANAGER_VIEW_TYPE,
             (leaf) => new ConflictManagerView(leaf)
+        );
+        this.app.workspace.onLayoutReady(() => {
+            const existingLeaves = this.app.workspace.getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE);
+            existingLeaves.forEach(leaf => leaf.detach());
+        });
+
+        // Conflict notifier
+        this.notifier = new ConflictManagerNotifier(
+            (mainFile, conflictFiles) => void this.activateView(mainFile, conflictFiles),
+        );
+        this.registerEvent(
+            this.app.workspace.on('file-open', (file: TFile | null) => {
+                // setTimeout in case when obsidian open aand ConflictManagerViewLeaf is closed
+                setTimeout(() => {
+                    if (!file) return;
+                    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                    if (view) this.notifier.checkAndNotifyConflicts(this.settings, file, view);
+                }, 100);
+            })
         );
 	}
 

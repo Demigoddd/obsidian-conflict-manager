@@ -35,6 +35,10 @@ export class ConflictManagerNotifier {
         // Create banner
         const banner = document.createElement('div');
         banner.addClass('conflict-manager-banner');
+        banner.animate(
+            [{ opacity: 0, transform: 'translateY(-8px)' }, { opacity: 1, transform: 'translateY(0)' }],
+            {duration: 200, easing: 'ease-out', fill: 'forwards'}
+        );
 
         // Set icon
         const icon = banner.createEl('span', { cls: 'icon' });
@@ -53,7 +57,8 @@ export class ConflictManagerNotifier {
         bannerReviewButton.onclick = () => this.onReview(activeFile, conflictFiles);
 
         // Close button
-        const bannerCloseButton = bannerActions.createEl('button', { text: 'X', cls: 'button' });
+        const bannerCloseButton = bannerActions.createEl('button', { cls: 'button' });
+        setIcon(bannerCloseButton, 'x')
         bannerCloseButton.onclick = () => this.closeConflictBanner(view);
 
         // Insert the banner at the very top of the editor view
