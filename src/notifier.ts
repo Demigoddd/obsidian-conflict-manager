@@ -8,7 +8,7 @@ export class ConflictManagerNotifier {
         this.onReview = onReview;
     }
 
-    checkAndNotifyConflicts(settings: ConflictManagerSettings, activeFile: TFile, view: MarkdownView): void {
+    checkAndNotifyConflicts(view: MarkdownView, settings: ConflictManagerSettings, activeFile: TFile): void {
         const { basename, extension, parent } = activeFile;
 
         if (!parent) return;
@@ -23,16 +23,14 @@ export class ConflictManagerNotifier {
             );
         });
 
-        // clear the current conflict banner
-        this.closeConflictBanner(view);
-
-        if (conflictFiles.length > 0) {
-            this.createConflictBanner(view, activeFile, conflictFiles);
-        }
+        this.createConflictBanner(view, activeFile, conflictFiles);
     }
 
     createConflictBanner(view: MarkdownView, activeFile: TFile, conflictFiles: TFile[]) {
+        if (conflictFiles.length === 0) return void this.closeConflictBanner(view);
+
         // Create banner
+        this.closeConflictBanner(view)
         const banner = document.createElement('div');
         banner.addClass('conflict-manager-banner');
         banner.animate(

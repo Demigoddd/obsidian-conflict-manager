@@ -6,8 +6,9 @@ export const CONFLICT_MANAGER_VIEW_TYPE = "conflict-manager-view";
 
 export class ConflictManagerView extends ItemView {
     private mainFile: TFile | null = null;
-    private conflictFileAll: TFile[] = [];
+    private conflictFiles: TFile[] = [];
     private currentIdx: number = -1;
+    private onConflictsUpdated: ((conflictFiles: TFile[]) => void) | null = null;
     private updateNavInfo: () => void;
 
     constructor(leaf: WorkspaceLeaf) {
@@ -18,10 +19,11 @@ export class ConflictManagerView extends ItemView {
     getViewType() { return CONFLICT_MANAGER_VIEW_TYPE; }
     getDisplayText() { return "Conflict Manager"; } // eslint-disable-line
 
-    setFiles(main: TFile, conflicts: TFile[]) {
+    setFiles(main: TFile, conflicts: TFile[], onUpdate?: (conflictFiles: TFile[]) => void) {
         this.mainFile = main;
-        this.conflictFileAll = conflicts;
+        this.conflictFiles = conflicts;
         this.currentIdx = conflicts.length > 0 ? 0 : -1;
+        this.onConflictsUpdated = onUpdate ?? null;
         void this.onOpen();
     }
 
@@ -66,8 +68,8 @@ export class ConflictManagerView extends ItemView {
 
         // Update
         this.updateNavInfo = () => {
-            const total = this.conflictFileAll.length;
-            const name = this.conflictFileAll[this.currentIdx]?.name ?? 'Unknown';
+            const total = this.conflictFiles.length;
+            const name = this.conflictFiles[this.currentIdx]?.name ?? 'Unknown';
             info.setText(total ? `${this.currentIdx + 1}/${total} - ${name}` : 'No conflicts');
         };
         this.updateNavInfo();
@@ -76,7 +78,7 @@ export class ConflictManagerView extends ItemView {
     private navigate(delta: number) {
         const newIdx = this.currentIdx + delta;
 
-        if (newIdx < 0 || newIdx >= this.conflictFileAll.length) return;
+        if (newIdx < 0 || newIdx >= this.conflictFiles.length) return;
 
         this.currentIdx = newIdx;
 
@@ -85,7 +87,7 @@ export class ConflictManagerView extends ItemView {
     }
 
     private async deleteCurrent() {
-        const file = this.conflictFileAll[this.currentIdx];
+        const file = this.conflictFiles[this.currentIdx];
 
         if (!file) return;
 
@@ -99,16 +101,17 @@ export class ConflictManagerView extends ItemView {
                     return;
                 }
 
-                this.conflictFileAll.splice(this.currentIdx, 1);
+                this.conflictFiles.splice(this.currentIdx, 1);
+                this.onConflictsUpdated?.(this.conflictFiles);
 
-                if (this.conflictFileAll.length === 0) {
+                if (this.conflictFiles.length === 0) {
                     this.containerEl.children[1]?.empty();
                     this.containerEl.children[1]?.createEl('h4', { text: "All conflicts resolved", cls: "empty-text"  });
                     return;
                 }
 
-                if (this.currentIdx >= this.conflictFileAll.length) {
-                    this.currentIdx = this.conflictFileAll.length - 1;
+                if (this.currentIdx >= this.conflictFiles.length) {
+                    this.currentIdx = this.conflictFiles.length - 1;
                 }
 
                 this.updateNavInfo?.();
@@ -124,7 +127,7 @@ export class ConflictManagerView extends ItemView {
         const view = container.querySelector('.view') as HTMLElement;
         if (!view) return;
 
-        const conflictFile = this.conflictFileAll[this.currentIdx];
+        const conflictFile = this.conflictFiles[this.currentIdx];
         if (!this.mainFile || !conflictFile) return;
 
         const [mainText, conflictText] = await Promise.all([

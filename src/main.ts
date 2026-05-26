@@ -32,7 +32,7 @@ export default class ConflictManager extends Plugin {
                 setTimeout(() => {
                     if (!file) return;
                     const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-                    if (view) this.notifier.checkAndNotifyConflicts(this.settings, file, view);
+                    if (view) this.notifier.checkAndNotifyConflicts(view, this.settings, file);
                 }, 100);
             })
         );
@@ -44,6 +44,7 @@ export default class ConflictManager extends Plugin {
         const { workspace } = this.app;
         let leaf: WorkspaceLeaf | null = null;
         const leaves = workspace.getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE);
+        const markdownView = workspace.getActiveViewOfType(MarkdownView);
 
         // If view already exists, use it
         // Otherwise, create a new tab in the main area
@@ -52,6 +53,12 @@ export default class ConflictManager extends Plugin {
 
         // Pass the files to the view via state
         await workspace.revealLeaf(leaf);
-        (leaf.view as ConflictManagerView).setFiles(mainFile, conflictFiles);
+        (leaf.view as ConflictManagerView).setFiles(
+            mainFile,
+            conflictFiles,
+            (conflictFiles) => {
+                if (markdownView) this.notifier.createConflictBanner(markdownView, mainFile, conflictFiles);
+            }
+        );
     }
 }
