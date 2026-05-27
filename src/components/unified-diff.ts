@@ -124,7 +124,7 @@ export class UnifiedDiff {
         el.addEventListener('click', () => {
             const tmp = document.createElement('div');
             hidden.forEach(r => this.paintRow(tmp as HTMLElement, r));
-            while (tmp.firstChild) el.insertAdjacentElement('beforebegin', tmp.firstChild as Element);
+            while (tmp.firstChild) wrap.insertBefore(tmp.firstChild, el);
             el.remove();
         });
     }

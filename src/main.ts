@@ -12,15 +12,30 @@ export default class ConflictManager extends Plugin {
         this.settings = { ...DEFAULT_SETTINGS, ...(await this.loadData() as Partial<ConflictManagerSettings>) };
 		this.addSettingTab(new ConflictManagerSettingTab(this.app, this));
 
+        // On Ready
+		this.app.workspace.onLayoutReady(() => {
+            // Remove an existing conflict manager view
+            const existingLeaves = this.app.workspace.getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE);
+            existingLeaves.forEach(leaf => leaf.detach());
+
+            // Add banners to all open notes
+            if (this.notifier) {
+                this.app.workspace.getLeavesOfType("markdown").forEach(leaf => {
+                    const view = leaf.view as MarkdownView;
+                    const file = view.file;
+
+                    if (view && file && file instanceof TFile) {
+                        this.notifier.checkAndNotifyConflicts(view, this.settings, file);
+                    }
+                });
+            }
+        });
+
         // Conflict view
         this.registerView(
             CONFLICT_MANAGER_VIEW_TYPE,
             (leaf) => new ConflictManagerView(leaf)
         );
-        this.app.workspace.onLayoutReady(() => {
-            const existingLeaves = this.app.workspace.getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE);
-            existingLeaves.forEach(leaf => leaf.detach());
-        });
 
         // Conflict notifier
         this.notifier = new ConflictManagerNotifier(
@@ -28,17 +43,21 @@ export default class ConflictManager extends Plugin {
         );
         this.registerEvent(
             this.app.workspace.on('file-open', (file: TFile | null) => {
-                // setTimeout in case when obsidian open aand ConflictManagerViewLeaf is closed
-                setTimeout(() => {
-                    if (!file) return;
-                    const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-                    if (view) this.notifier.checkAndNotifyConflicts(view, this.settings, file);
-                }, 100);
+                if (!file) return;
+                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                if (view) this.notifier.checkAndNotifyConflicts(view, this.settings, file);
             })
         );
 	}
 
-	onunload() {}
+	onunload() {
+        // Remove banners from all open notes
+        if (this.notifier) {
+            this.app.workspace.getLeavesOfType("markdown").forEach(leaf => {
+                this.notifier.closeConflictBanner(leaf.view as MarkdownView);
+            });
+        }
+    }
 
     async activateView(mainFile: TFile, conflictFiles: TFile[]) {
         const { workspace } = this.app;

@@ -8,7 +8,7 @@ export interface ConflictManagerSettings {
 export const DEFAULT_SETTINGS: ConflictManagerSettings = {
 	conflictFilePattern: 'default'
 }
-// TODO: Add regexp and test it in the settings window
+
 export class ConflictManagerSettingTab extends PluginSettingTab {
 	plugin: ConflictManager;
 

@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf, TFile, setIcon, Notice } from 'obsidian';
-import { UnifiedDiff } from 'components/unified-diff';
-import { DeleteConfirmModal } from 'components/delete-confirm-modal';
+import { UnifiedDiff } from './components/unified-diff';
+import { DeleteConfirmModal } from './components/delete-confirm-modal';
 
 export const CONFLICT_MANAGER_VIEW_TYPE = "conflict-manager-view";
 
