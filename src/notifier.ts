@@ -10,10 +10,8 @@ export class ConflictManagerNotifier {
 
     checkAndNotifyConflicts(view: MarkdownView, settings: ConflictManagerSettings, activeFile: TFile): void {
         const { basename, extension, parent } = activeFile;
-        const userPattern = settings.conflictFilePattern ? this.escapeRegExp(settings.conflictFilePattern.trim()) : 'conflict';
-        const escapedBasename = this.escapeRegExp(basename);
 
-        if (!parent) return;
+        if (!parent || !settings.conflictFilePattern?.trim()) return void this.closeConflictBanner(view);
 
         /*
          * Generate a secure Regex with the user's word
@@ -29,6 +27,8 @@ export class ConflictManagerNotifier {
          * | Obsidian Git  | conflicts within the file (<<<<<<< HEAD)       |
          * | iCloud Drive  | version selection dialog (no separate file)    |
          */
+        const userPattern = this.escapeRegExp(settings.conflictFilePattern.trim());
+        const escapedBasename = this.escapeRegExp(basename);
         const regexStr = `^${escapedBasename}[\\s\\.\\-\\(]+.*(?:${userPattern}).*$`;
         const conflictRegex = new RegExp(regexStr, 'i');
 

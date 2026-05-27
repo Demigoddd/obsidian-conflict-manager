@@ -6,7 +6,7 @@ export interface ConflictManagerSettings {
 }
 
 export const DEFAULT_SETTINGS: ConflictManagerSettings = {
-	conflictFilePattern: ''
+	conflictFilePattern: 'conflict'
 }
 
 export class ConflictManagerSettingTab extends PluginSettingTab {
@@ -24,7 +24,7 @@ export class ConflictManagerSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Conflict file pattern')
-			.setDesc('Write the text to search for file conflict (regex not supported)')
+			.setDesc(`Enter text to search for file conflicts (e.g: "conflict", regex: "not supported")`)
 			.addText(text => text
 				.setPlaceholder('Enter pattern')
 				.setValue(this.plugin.settings.conflictFilePattern)
