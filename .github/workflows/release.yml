@@ -1,35 +1,68 @@
-name: Release Obsidian plugin
+name: Release
 
 on:
   push:
     tags:
       - "*"
+env:
+  PLUGIN_NAME: obsidian-conflict-manager
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
+      attestations: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18.x"
 
-      - name: Build plugin
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Get tag
+        id: tag
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create zip
+        id: zip
         run: |
-          npm install
-          npm run build
+          ZIP_NAME="${{ env.PLUGIN_NAME }}-${{ steps.tag.outputs.tag }}.zip"
+
+          zip -r "$ZIP_NAME" \
+            main.js \
+            manifest.json \
+            styles.css
+
+          echo "zip=$ZIP_NAME" >> $GITHUB_OUTPUT
+
+      - name: Generate attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
+            ${{ steps.zip.outputs.zip }}
+
 
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="${GITHUB_REF#refs/tags/}"
-
-          gh release create "$tag" \
-            --title="$tag" \
-            --draft \
-            main.js manifest.json styles.css
+          gh release create "${{ steps.tag.outputs.tag }}" \
+            --title "${{ steps.tag.outputs.tag }}" \
+            --generate-notes \
+            main.js \
+            manifest.json \
+            styles.css \
+            "${{ steps.zip.outputs.zip }}"
