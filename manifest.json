@@ -6,5 +6,5 @@
 	"description": "Review and resolve sync conflicts from any cloud service.",
 	"author": "Armen Abrahamyan",
 	"authorUrl": "https://github.com/Demigoddd",
-	"isDesktopOnly": false
+	"isDesktopOnly": true
 }
