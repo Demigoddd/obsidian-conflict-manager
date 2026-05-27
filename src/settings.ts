@@ -6,7 +6,7 @@ export interface ConflictManagerSettings {
 }
 
 export const DEFAULT_SETTINGS: ConflictManagerSettings = {
-	conflictFilePattern: 'default'
+	conflictFilePattern: ''
 }
 
 export class ConflictManagerSettingTab extends PluginSettingTab {
