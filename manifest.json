@@ -1,9 +1,9 @@
 {
 	"id": "conflict-manager",
 	"name": "Conflict Manager",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"minAppVersion": "0.15.0",
-	"description": "Conflict manager plugin for obsidian.",
+	"description": "Review and resolve sync conflicts from any cloud service.",
 	"author": "Armen Abrahamyan",
 	"authorUrl": "https://github.com/Demigoddd",
 	"isDesktopOnly": false

@@ -61,6 +61,7 @@ jobs:
         run: |
           gh release create "${{ steps.tag.outputs.tag }}" \
             --title "${{ steps.tag.outputs.tag }}" \
+            --draft \
             --generate-notes \
             main.js \
             manifest.json \
