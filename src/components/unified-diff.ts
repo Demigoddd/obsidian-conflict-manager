@@ -12,11 +12,8 @@ interface Row {
 
 export class UnifiedDiff {
     static render(container: HTMLElement, mainText: string, conflictText: string): void {
-        container.empty();
-
         const rows = this.buildRows(mainText, conflictText);
         if (!rows.some(r => r.type !== 'unchanged')) return void container.createEl('h4', { text: "Files are identical", cls: "empty-text" });
-
         this.paint(container, rows);
     }
 
@@ -31,8 +28,29 @@ export class UnifiedDiff {
 
             if (current.removed && next?.added) {
                 const nextText = next.value.replace(/\n$/, '').split('\n');
-                currentText.forEach((t, k) => rows.push({ type: 'delete', text: t, mainNumber: m++, conflictNumber: null, pair: nextText[k] }));
-                nextText.forEach((t, k) => rows.push({ type: 'insert', text: t, mainNumber: null, conflictNumber: c++, pair: currentText[k] }));
+
+                currentText.forEach((t, k) => {
+                    const hasPair = k < nextText.length;
+                    rows.push({
+                        type: 'delete',
+                        text: t,
+                        mainNumber: m++,
+                        conflictNumber: null,
+                        pair: hasPair ? nextText[k] : undefined
+                    });
+                });
+
+                nextText.forEach((t, k) => {
+                    const hasPair = k < currentText.length;
+                    rows.push({
+                        type: 'insert',
+                        text: t,
+                        mainNumber: null,
+                        conflictNumber: c++,
+                        pair: hasPair ? currentText[k] : undefined
+                    });
+                });
+
                 i += 2;
                 continue;
             }

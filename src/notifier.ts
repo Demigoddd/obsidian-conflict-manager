@@ -60,12 +60,12 @@ export class ConflictManagerNotifier {
         setIcon(icon, 'alert-triangle');
 
         // Message container
-        const bannerMessage = banner.createEl('div', { cls: 'message' });
+        const bannerMessage = banner.createDiv({ cls: 'message' });
         bannerMessage.createEl('strong', { text: `${conflictFiles.length} ` });
         bannerMessage.createEl('span', { text: `unresolved conflict${conflictFiles.length > 1 ? 's' : ''} in this note` });
 
         // Banner Actions
-        const bannerActions = banner.createEl('div', { cls: 'actions' });
+        const bannerActions = banner.createDiv({ cls: 'actions' });
 
         // Review button
         const bannerReviewButton = bannerActions.createEl('button', { text: 'Review', cls: 'button' });

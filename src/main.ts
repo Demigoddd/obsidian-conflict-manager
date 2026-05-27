@@ -12,6 +12,24 @@ export default class ConflictManager extends Plugin {
         this.settings = { ...DEFAULT_SETTINGS, ...(await this.loadData() as Partial<ConflictManagerSettings>) };
 		this.addSettingTab(new ConflictManagerSettingTab(this.app, this));
 
+        // Conflict view
+        this.registerView(
+            CONFLICT_MANAGER_VIEW_TYPE,
+            (leaf) => new ConflictManagerView(leaf)
+        );
+
+        // Conflict notifier
+        this.notifier = new ConflictManagerNotifier(
+            (mainFile, conflictFiles) => void this.activateView(mainFile, conflictFiles),
+        );
+        this.registerEvent(
+            this.app.workspace.on('file-open', (file: TFile | null) => {
+                if (!file) return;
+                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+                if (view) this.notifier.checkAndNotifyConflicts(view, this.settings, file);
+            })
+        );
+
         // On Ready
 		this.app.workspace.onLayoutReady(() => {
             // Remove an existing conflict manager view
@@ -30,31 +48,17 @@ export default class ConflictManager extends Plugin {
                 });
             }
         });
-
-        // Conflict view
-        this.registerView(
-            CONFLICT_MANAGER_VIEW_TYPE,
-            (leaf) => new ConflictManagerView(leaf)
-        );
-
-        // Conflict notifier
-        this.notifier = new ConflictManagerNotifier(
-            (mainFile, conflictFiles) => void this.activateView(mainFile, conflictFiles),
-        );
-        this.registerEvent(
-            this.app.workspace.on('file-open', (file: TFile | null) => {
-                if (!file) return;
-                const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-                if (view) this.notifier.checkAndNotifyConflicts(view, this.settings, file);
-            })
-        );
 	}
 
 	onunload() {
         // Remove banners from all open notes
         if (this.notifier) {
             this.app.workspace.getLeavesOfType("markdown").forEach(leaf => {
-                this.notifier.closeConflictBanner(leaf.view as MarkdownView);
+                const view = leaf.view;
+
+                if (view instanceof MarkdownView) {
+                    this.notifier.closeConflictBanner(view);
+                }
             });
         }
     }

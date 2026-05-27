@@ -24,16 +24,16 @@ export class ConflictManagerView extends ItemView {
         this.conflictFiles = conflicts;
         this.currentIdx = conflicts.length > 0 ? 0 : -1;
         this.onConflictsUpdated = onUpdate ?? null;
-        void this.onOpen();
+
+        this.updateNavInfo?.();
+        void this.renderDiff();
     }
 
     async onOpen() {
         // Container init
-        const container = this.containerEl.children[1];
-        if (!container) return;
+        const container = this.contentEl;
         container.empty();
         container.addClass('conflict-manager-view');
-        if (!this.mainFile) return void container.createEl('h4', { text: "No conflicts", cls: "empty-text" });
 
         // Navigation
         const navigation = container.createDiv({ cls: 'navigation' });
@@ -45,6 +45,10 @@ export class ConflictManagerView extends ItemView {
 
         // Listening to changes in the main file for updating conflict file
         this.registerEvent(this.app.metadataCache.on('changed', (file: TFile) => file === this.mainFile && void this.renderDiff()));
+    }
+
+    async onClose() {
+        this.contentEl.empty();
     }
 
     private buildNav(navigation: HTMLElement) {
@@ -126,9 +130,10 @@ export class ConflictManagerView extends ItemView {
 
         const view = container.querySelector('.view') as HTMLElement;
         if (!view) return;
+        view.empty();
 
         const conflictFile = this.conflictFiles[this.currentIdx];
-        if (!this.mainFile || !conflictFile) return;
+        if (!this.mainFile || !conflictFile) return void view.createEl('h4', { text: "No conflicts", cls: "empty-text" });
 
         const [mainText, conflictText] = await Promise.all([
             this.app.vault.cachedRead(this.mainFile),
