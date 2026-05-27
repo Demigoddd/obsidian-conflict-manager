@@ -1,6 +1,6 @@
 # Obsidian Conflict Manager
 
-<img src=".github/media/presentation.gif" width="1920" height="756" alt="presentation" />
+<img src=".github/media/presentation.gif" width="900" alt="presentation" />
 
 * **Alert Banner Notification:** A top-banner alerts you the exact moment unresolved sync conflicts are found in your current note.
 * **Side-by-Side Diff Viewer:** Review differences between the original note and conflict files using an intuitive split-pane layout.
