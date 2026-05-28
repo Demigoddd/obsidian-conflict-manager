@@ -53,8 +53,7 @@
 }
 
 /* Conflict Manager view styles */
-.workspace-leaf-content .view-content,
-.conflict-manager-view {
+.workspace-leaf-content .view-content.conflict-manager-view {
   display: flex;
   flex-direction: column;
   height: 100%;
