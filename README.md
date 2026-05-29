@@ -28,6 +28,9 @@ Search **Conflict Manager** in the community plugins of Obsidian, then **Install
 @media (prefers-color-scheme: dark) { /* same code for dark mode ... */ }
 ```
 
+2) When copying and pasting multiple lines in Obsidian, an extra line break is inserted.  
+**Solution:** Go to Setting > Editor > Convert pasted HTML to Markdown > toggle Disable.
+
 ## Contributing
 If you have any issues/suggestions, please open an issue on the repository.
 If you'd like to contribute to the code, please fork the repository and submit a pull request.
