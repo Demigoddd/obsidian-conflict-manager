@@ -1,6 +1,6 @@
 {
 	"name": "conflict-manager",
-	"version": "1.0.10",
+	"version": "1.0.11",
 	"description": "",
 	"main": "main.js",
 	"type": "module",
