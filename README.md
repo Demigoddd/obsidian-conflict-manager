@@ -1,9 +1,11 @@
 # Obsidian Conflict Manager
 
 <img src=".github/media/presentation.gif" width="900" alt="presentation" />
+A simple plugin for conflict resolution. No more hunting through your file system. Just open your note, hit Review, and Resolve.
 
-* **Alert Banner Notification:** A top-banner alerts you the exact moment unresolved sync conflicts are found in your current note.
-* **Side-by-Side Diff Viewer:** Review differences between the original note and conflict files using an intuitive split-pane layout.
+## Features
+* **Alert Banner:** A top banner alerts you that your current note contains unresolved sync conflicts.
+* **Diff Viewer:** Review differences between the original note and conflict files using an intuitive split-pane layout.
 
 ## Installation
 Search **Conflict Manager** in the community plugins of Obsidian, then **Install** and **Enable** the plugin.
