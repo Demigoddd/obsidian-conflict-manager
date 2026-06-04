@@ -1,36 +1,38 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
-import ConflictManager from "./main";
+import { App, PluginSettingTab, Setting } from 'obsidian';
+import ConflictManager from './main';
 
 export interface ConflictManagerSettings {
-	conflictFilePattern: string;
+  conflictFilePattern: string;
 }
 
 export const DEFAULT_SETTINGS: ConflictManagerSettings = {
-	conflictFilePattern: 'conflict'
-}
+  conflictFilePattern: 'conflict',
+};
 
 export class ConflictManagerSettingTab extends PluginSettingTab {
-	plugin: ConflictManager;
+  plugin: ConflictManager;
 
-	constructor(app: App, plugin: ConflictManager) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
+  constructor(app: App, plugin: ConflictManager) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
 
-	display(): void {
-		const {containerEl} = this;
+  display(): void {
+    const { containerEl } = this;
 
-		containerEl.empty();
+    containerEl.empty();
 
-		new Setting(containerEl)
-			.setName('Conflict file pattern')
-			.setDesc(`Enter text to search for file conflicts (e.g: "conflict", regex: "not supported")`)
-			.addText(text => text
-				.setPlaceholder('Enter pattern')
-				.setValue(this.plugin.settings.conflictFilePattern)
-				.onChange(async (value) => {
-					this.plugin.settings.conflictFilePattern = value;
-                    await this.plugin.saveData(this.plugin.settings)
-				}));
-	}
+    new Setting(containerEl)
+      .setName('Conflict file pattern')
+      .setDesc(`Enter text to search for file conflicts (e.g: "conflict", regex: "not supported")`)
+      .addText((text) =>
+        text
+          .setPlaceholder('Enter pattern')
+          .setValue(this.plugin.settings.conflictFilePattern)
+          .onChange(async (value) => {
+            this.plugin.settings.conflictFilePattern = value;
+            await this.plugin.saveData(this.plugin.settings);
+          }),
+      );
+  }
 }
