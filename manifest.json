@@ -1,10 +1,10 @@
 {
-	"id": "conflict-manager",
-	"name": "Conflict Manager",
-	"version": "1.0.11",
-	"minAppVersion": "0.15.0",
-	"description": "Review and resolve sync conflicts from any cloud service.",
-	"author": "Armen Abrahamyan",
-	"authorUrl": "https://github.com/Demigoddd",
-	"isDesktopOnly": true
+    "id": "conflict-manager",
+    "name": "Conflict Manager",
+    "version": "1.0.11",
+    "minAppVersion": "0.15.0",
+    "description": "Review and resolve sync conflicts from any cloud service.",
+    "author": "Armen Abrahamyan",
+    "authorUrl": "https://github.com/Demigoddd",
+    "isDesktopOnly": true
 }

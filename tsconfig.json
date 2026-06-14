@@ -1,31 +1,33 @@
 {
-	"compilerOptions": {
-		"ignoreDeprecations": "5.0",
-		"inlineSourceMap": true,
-		"inlineSources": true,
-		"module": "ESNext",
-		"target": "ES6",
-		"allowJs": true,
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"noImplicitReturns": true,
-		"moduleResolution": "Bundler",
-		"importHelpers": true,
-		"noUncheckedIndexedAccess": true,
-		"isolatedModules": true,
-		"strictNullChecks": true,
-		"strictBindCallApply": true,
-		"allowSyntheticDefaultImports": true,
-		"useUnknownInCatchVariables": true,
+    "compilerOptions": {
+        "ignoreDeprecations": "5.0",
+        "inlineSourceMap": true,
+        "inlineSources": true,
+        "module": "ESNext",
+        "target": "ES6",
+        "allowJs": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
+        "moduleResolution": "Bundler",
+        "importHelpers": true,
+        "noUncheckedIndexedAccess": true,
+        "isolatedModules": true,
+        "strictNullChecks": true,
+        "strictBindCallApply": true,
+        "allowSyntheticDefaultImports": true,
+        "useUnknownInCatchVariables": true,
         "paths": {
-            "@/*": ["./src/*"]
+            "@/*": [
+                "./src/*"
+            ]
         },
-		"lib": [
-			"DOM",
-			"ES2019"
-		]
-	},
-	"include": [
-		"src/**/*.ts"
-	]
+        "lib": [
+            "DOM",
+            "ES2019"
+        ]
+    },
+    "include": [
+        "src/**/*.ts"
+    ]
 }
