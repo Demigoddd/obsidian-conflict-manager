@@ -20,8 +20,7 @@ export class ConflictManagerView extends ItemView {
     return CONFLICT_MANAGER_VIEW_TYPE;
   }
   getDisplayText() {
-    // eslint-disable-next-line obsidianmd/ui/sentence-case
-    return 'Conflict Manager';
+    return 'Conflict Manager'; // eslint-disable-line
   }
 
   setFiles(main: TFile, conflicts: TFile[], onUpdate?: (conflictFiles: TFile[]) => void) {
@@ -111,8 +110,7 @@ export class ConflictManagerView extends ItemView {
           await this.app.fileManager.trashFile(file);
           new Notice(`Conflict Manager: Moved ${file.name} to trash`);
         } catch {
-          // eslint-disable-next-line obsidianmd/ui/sentence-case
-          new Notice('Conflict Manager: Failed to move file to trash');
+          new Notice('Conflict Manager: Failed to move file to trash'); // eslint-disable-line
           return;
         }
 

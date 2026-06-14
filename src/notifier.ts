@@ -37,7 +37,7 @@ export class ConflictManagerNotifier {
 
     // Create banner
     this.closeConflictBanner(view);
-    const banner = document.createElement('div');
+    const banner = window.activeDocument.createElement('div');
     banner.addClass('conflict-manager-banner');
     banner.animate(
       [

@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "*"
+      - '*'
 env:
   PLUGIN_NAME: obsidian-conflict-manager
 
@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: '18.x'
 
       - name: Install dependencies
         run: npm install
@@ -54,7 +54,6 @@ jobs:
             styles.css
             ${{ steps.zip.outputs.zip }}
 
-
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,6 +61,8 @@ jobs:
           gh release create "${{ steps.tag.outputs.tag }}" \
             --title "${{ steps.tag.outputs.tag }}" \
             --draft \
+            --notes "## [View Full Changelog for ${{ steps.tag.outputs.tag }}](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+            ---" \
             --generate-notes \
             main.js \
             manifest.json \

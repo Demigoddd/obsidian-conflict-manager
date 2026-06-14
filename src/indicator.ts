@@ -1,4 +1,3 @@
-/* eslint-disable obsidianmd/ui/sentence-case */
 import { Menu, Notice, TFile, setIcon, setTooltip } from 'obsidian';
 import ConflictManager from './main';
 import { ConflictManagerSettings } from './settings';
@@ -107,14 +106,14 @@ export class ConflictManagerIndicator {
       } else if (appWithInternalPlugins.commands?.executeCommandById) {
         appWithInternalPlugins.commands.executeCommandById('global-search:open');
       } else {
-        new Notice('Conflict Manager: Global search is unavailable');
+        new Notice('Conflict Manager: Global search is unavailable'); // eslint-disable-line
       }
 
-      new Notice('Conflict Manager: Trigger global search for conflicts');
+      new Notice('Conflict Manager: Trigger global search for conflicts'); // eslint-disable-line
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
       console.error('Conflict Manager: Failed to open global search', err);
-      new Notice('Conflict Manager: Failed to open global search automatically');
+      new Notice('Conflict Manager: Failed to open global search automatically'); // eslint-disable-line
     }
   }
 
@@ -124,7 +123,7 @@ export class ConflictManagerIndicator {
     const menu = new Menu();
 
     menu.addItem((item) => {
-      item.setTitle('Conflict Manager').setDisabled(true);
+      item.setTitle('Conflict Manager').setDisabled(true); // eslint-disable-line
     });
     menu.addSeparator();
     menu.addItem((item) => {
