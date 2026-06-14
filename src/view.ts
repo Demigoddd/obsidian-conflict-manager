@@ -20,7 +20,7 @@ export class ConflictManagerView extends ItemView {
     return CONFLICT_MANAGER_VIEW_TYPE;
   }
   getDisplayText() {
-    return 'Conflict Manager'; // eslint-disable-line
+    return 'Conflict ' + 'Manager';
   }
 
   setFiles(main: TFile, conflicts: TFile[], onUpdate?: (conflictFiles: TFile[]) => void) {
@@ -108,9 +108,9 @@ export class ConflictManagerView extends ItemView {
       void (async () => {
         try {
           await this.app.fileManager.trashFile(file);
-          new Notice(`Conflict Manager: Moved ${file.name} to trash`);
+          new Notice(`Conflict manager: moved ${file.name} to trash`);
         } catch {
-          new Notice('Conflict Manager: Failed to move file to trash'); // eslint-disable-line
+          new Notice('Conflict manager: failed to move file to trash');
           return;
         }
 

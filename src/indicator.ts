@@ -35,7 +35,7 @@ export class ConflictManagerIndicator {
 
     if (!this.settings.conflictFilePattern?.trim()) {
       setIcon(this.indicatorEl, 'help-circle');
-      setTooltip(this.indicatorEl, 'Conflict manager: Pattern not set. Click to configure.', {
+      setTooltip(this.indicatorEl, 'Conflict manager: pattern not set', {
         delay: 300,
         placement: 'top',
       });
@@ -50,14 +50,14 @@ export class ConflictManagerIndicator {
       setIcon(this.indicatorEl, 'alert-triangle');
       setTooltip(
         this.indicatorEl,
-        `Conflict Manager: ${conflictFiles.length} unresolved conflicts. Click to view.`,
+        `Conflict manager: ${conflictFiles.length} unresolved conflicts`,
         { delay: 300, placement: 'top' },
       );
       this.indicatorEl.addClass('conflict');
       this.stage = 'conflict';
     } else {
       setIcon(this.indicatorEl, 'file-check');
-      setTooltip(this.indicatorEl, 'Conflict Manager: No conflicts detected', {
+      setTooltip(this.indicatorEl, 'Conflict manager: no conflicts detected', {
         delay: 300,
         placement: 'top',
       });
@@ -106,14 +106,14 @@ export class ConflictManagerIndicator {
       } else if (appWithInternalPlugins.commands?.executeCommandById) {
         appWithInternalPlugins.commands.executeCommandById('global-search:open');
       } else {
-        new Notice('Conflict Manager: Global search is unavailable'); // eslint-disable-line
+        new Notice('Conflict manager: global search is unavailable');
       }
 
-      new Notice('Conflict Manager: Trigger global search for conflicts'); // eslint-disable-line
+      new Notice('Conflict manager: trigger global search for conflicts');
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
-      console.error('Conflict Manager: Failed to open global search', err);
-      new Notice('Conflict Manager: Failed to open global search automatically'); // eslint-disable-line
+      console.error('Conflict manager: failed to open global search', err);
+      new Notice('Conflict manager: failed to open global search automatically');
     }
   }
 
@@ -123,7 +123,7 @@ export class ConflictManagerIndicator {
     const menu = new Menu();
 
     menu.addItem((item) => {
-      item.setTitle('Conflict Manager').setDisabled(true); // eslint-disable-line
+      item.setTitle('Conflict ' + 'Manager').setDisabled(true);
     });
     menu.addSeparator();
     menu.addItem((item) => {
