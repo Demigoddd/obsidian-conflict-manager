@@ -1,5 +1,6 @@
 import { MarkdownView, TFile, setIcon } from 'obsidian';
 import { ConflictManagerSettings } from './settings';
+import { conflictRegExp, escapeRegExp } from './utils';
 
 export class ConflictManagerNotifier {
   private onReview: (mainFile: TFile, conflictFiles: TFile[]) => void;
@@ -18,31 +19,14 @@ export class ConflictManagerNotifier {
     if (!parent || !settings.conflictFilePattern?.trim())
       return void this.closeConflictBanner(view);
 
-    /*
-     * Generate a secure Regex with the user's word
-     * Expect: OriginalName + Delimiter(space/dot/hyphen/bracket) + ... + UserPattern + ...
-     *
-     * | Services      | File name format                               |
-     * | ------------- | ---------------------------------------------- |
-     * | Obsidian Sync | file (Conflicted copy Device YYYYMMDDHHMM).md  |
-     * | Dropbox       | file (conflicted copy YYYY-MM-DD HH MM SS).md  |
-     * | Google Drive  | file (conflict - YYYY-MM-DD HH.MM.SS).md       |
-     * | Syncthing     | file.sync-conflict-YYYYMMDD-HHMMSS-DEVICEID.md |
-     * | Remotely Save | file.conflict.md                               |
-     * | Obsidian Git  | conflicts within the file (<<<<<<< HEAD)       |
-     * | iCloud Drive  | version selection dialog (no separate file)    |
-     */
-    const userPattern = this.escapeRegExp(settings.conflictFilePattern.trim());
-    const escapedBasename = this.escapeRegExp(basename);
-    const regexStr = `^${escapedBasename}[\\s\\.\\-\\(]+.*(?:${userPattern}).*$`;
-    const conflictRegex = new RegExp(regexStr, 'i');
-
-    // Filtering files in a folder
+    const escapedBasename = escapeRegExp(basename);
+    const userPattern = escapeRegExp(settings.conflictFilePattern.trim());
+    const regex = conflictRegExp(escapedBasename, userPattern);
     const conflictFiles: TFile[] = parent.children.filter((child): child is TFile => {
       if (!(child instanceof TFile)) return false;
       if (child.extension !== extension) return false;
       if (child.path === activeFile.path) return false;
-      return conflictRegex.test(child.basename);
+      return regex.test(child.basename);
     });
 
     this.createConflictBanner(view, activeFile, conflictFiles);
@@ -92,9 +76,5 @@ export class ConflictManagerNotifier {
 
   closeConflictBanner(view: MarkdownView) {
     view.contentEl.querySelector('.conflict-manager-banner')?.remove();
-  }
-
-  escapeRegExp(str: string): string {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 }

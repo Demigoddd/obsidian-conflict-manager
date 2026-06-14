@@ -1,11 +1,14 @@
-import { Plugin, TFile, MarkdownView, WorkspaceLeaf } from 'obsidian';
+import { Plugin, TFile, MarkdownView, WorkspaceLeaf, debounce } from 'obsidian';
 import { DEFAULT_SETTINGS, ConflictManagerSettings, ConflictManagerSettingTab } from './settings';
 import { ConflictManagerView, CONFLICT_MANAGER_VIEW_TYPE } from './view';
 import { ConflictManagerNotifier } from './notifier';
+import { ConflictManagerIndicator } from './indicator';
 
 export default class ConflictManager extends Plugin {
   settings!: ConflictManagerSettings;
   notifier!: ConflictManagerNotifier;
+  indicator!: ConflictManagerIndicator;
+  private debouncedIndicatorUpdate = debounce(() => this.indicator.update(), 500, true);
 
   async onload() {
     // Setting
@@ -14,6 +17,12 @@ export default class ConflictManager extends Plugin {
       ...((await this.loadData()) as Partial<ConflictManagerSettings>),
     };
     this.addSettingTab(new ConflictManagerSettingTab(this.app, this));
+
+    // Setup StatusBar
+    this.indicator = new ConflictManagerIndicator(this, this.settings);
+    this.registerEvent(this.app.vault.on('create', () => this.debouncedIndicatorUpdate()));
+    this.registerEvent(this.app.vault.on('delete', () => this.debouncedIndicatorUpdate()));
+    this.registerEvent(this.app.vault.on('rename', () => this.debouncedIndicatorUpdate()));
 
     // Conflict view
     this.registerView(CONFLICT_MANAGER_VIEW_TYPE, (leaf) => new ConflictManagerView(leaf));
@@ -35,6 +44,9 @@ export default class ConflictManager extends Plugin {
       // Remove an existing conflict manager view
       const existingLeaves = this.app.workspace.getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE);
       existingLeaves.forEach((leaf) => leaf.detach());
+
+      // Update status bar indicator
+      this.indicator.update();
 
       // Add banners to all open notes
       if (this.notifier) {

@@ -182,3 +182,27 @@
     .collapse-action { font-weight: 600; color: var(--interactive-accent); }
   }
 }
+
+/* Conflict Manager indicator styles */
+.conflict-manager-indicator {
+  display: inline-flex;
+}
+
+.conflict-manager-indicator.hide {
+  display: none;
+}
+
+.conflict-manager-indicator.success {
+  color: var(--text-success);
+  cursor: default;
+}
+
+.conflict-manager-indicator.conflict {
+  color: var(--text-error);
+  cursor: pointer;
+}
+
+.conflict-manager-indicator.info {
+  color: var(--text-warning);
+  cursor: pointer;
+}
