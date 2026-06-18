@@ -61,7 +61,7 @@ jobs:
           gh release create "${{ steps.tag.outputs.tag }}" \
             --title "${{ steps.tag.outputs.tag }}" \
             --draft \
-            --notes "## [Changelog for ${{ steps.tag.outputs.tag }}](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)" \
+            --notes "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." \
             --generate-notes \
             main.js \
             manifest.json \
