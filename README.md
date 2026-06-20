@@ -11,7 +11,7 @@ A simple plugin for conflict resolution. No more hunting through your file syste
 
 ## Installation
 
-Search **Conflict Manager** in the community plugins of Obsidian, then **Install** and **Enable** the plugin.
+Search [Conflict Manager](https://community.obsidian.md/plugins/conflict-manager) in the community plugins of Obsidian, then **Install** and **Enable** the plugin.
 
 ## FAQ
 
