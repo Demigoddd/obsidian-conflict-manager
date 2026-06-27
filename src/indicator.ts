@@ -157,7 +157,7 @@ export class ConflictManagerIndicator {
 
   private getOriginalConflictFilesQuery(): RegExp {
     const userPattern = escapeRegExp(this.settings.conflictFilePattern?.trim() || '');
-    const extractOriginalRegex = new RegExp(`^(.+?)[\\s\\.\\-\\(]+.*(?:${userPattern}).*$`, 'i');
+    const extractOriginalRegex = new RegExp(`^(.+)[\\s\\.\\-\\(]+.*(?:${userPattern}).*$`, 'i');
     const originalNames = this.plugin.app.vault
       .getMarkdownFiles()
       .map((file) => extractOriginalRegex.exec(file.basename)?.[1]?.trim() ?? null)

@@ -1,7 +1,7 @@
 {
     "id": "conflict-manager",
     "name": "Conflict Manager",
-    "version": "1.1.2",
+    "version": "1.1.4",
     "minAppVersion": "1.7.2",
     "description": "Review and resolve sync conflicts from any cloud service.",
     "author": "Armen Abrahamyan",
