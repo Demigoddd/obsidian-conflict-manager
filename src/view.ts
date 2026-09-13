@@ -1,18 +1,21 @@
 import { ItemView, WorkspaceLeaf, TFile, setIcon, Notice } from 'obsidian';
 import { UnifiedDiff } from './components/unified-diff';
 import { DeleteConfirmModal } from './components/delete-confirm-modal';
+import { ConflictManagerSettings } from './settings';
 
 export const CONFLICT_MANAGER_VIEW_TYPE = 'conflict-manager-view';
 
 export class ConflictManagerView extends ItemView {
+  private settings: ConflictManagerSettings;
   private mainFile: TFile | null = null;
   private conflictFiles: TFile[] = [];
   private currentIdx: number = -1;
   private onConflictsUpdated: ((conflictFiles: TFile[]) => void) | null = null;
   private updateNavInfo: () => void;
 
-  constructor(leaf: WorkspaceLeaf) {
+  constructor(leaf: WorkspaceLeaf, settings: ConflictManagerSettings) {
     super(leaf);
+    this.settings = settings;
     this.updateNavInfo = () => {};
   }
 
@@ -34,10 +37,11 @@ export class ConflictManagerView extends ItemView {
   }
 
   async onOpen() {
-    // Container init
+    // init
     const container = this.contentEl;
     container.empty();
     container.addClass('conflict-manager-view');
+    this.applyColors();
 
     // Navigation
     const navigation = container.createDiv({ cls: 'navigation' });
@@ -58,6 +62,17 @@ export class ConflictManagerView extends ItemView {
 
   async onClose() {
     this.contentEl.empty();
+  }
+
+  applyColors() {
+    const { style } = this.contentEl.doc.body;
+    const { diffDeleteColorLight, diffInsertColorLight, diffDeleteColorDark, diffInsertColorDark } =
+      this.settings;
+
+    style.setProperty('--conflict-manager-delete-light', diffDeleteColorLight);
+    style.setProperty('--conflict-manager-insert-light', diffInsertColorLight);
+    style.setProperty('--conflict-manager-delete-dark', diffDeleteColorDark);
+    style.setProperty('--conflict-manager-insert-dark', diffInsertColorDark);
   }
 
   private buildNav(navigation: HTMLElement) {

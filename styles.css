@@ -5,11 +5,15 @@
 .theme-light {
   --banner-background: #fffad6;
   --banner-text-color: #5c4400;
+  --conflict-manager-delete: var(--conflict-manager-delete-light, var(--color-red));
+  --conflict-manager-insert: var(--conflict-manager-insert-light, var(--color-green));
 }
 
 .theme-dark {
   --banner-background: #3d2e00;
   --banner-text-color: #f5c842;
+  --conflict-manager-delete: var(--conflict-manager-delete-dark, var(--color-red));
+  --conflict-manager-insert: var(--conflict-manager-insert-dark, var(--color-green));
 }
 
 /* Conflict Manager banner styles */
@@ -117,32 +121,32 @@
     }
 
     .row-delete {
-      background: rgba(var(--color-red-rgb), 0.07);
+      background: color-mix(in srgb, var(--conflict-manager-delete) 7%, transparent);
 
       .highlight-soft {
-        background: rgba(var(--color-red-rgb), 0.15);
+        background: color-mix(in srgb, var(--conflict-manager-delete) 15%, transparent);
         border-radius: 2px;
         padding: 1px;
       }
 
       .highlight-strong {
-        background: rgba(var(--color-red-rgb), 0.40);
+        background: color-mix(in srgb, var(--conflict-manager-delete) 40%, transparent);
         border-radius: 2px;
         padding: 1px;
       }
     }
 
     .row-insert {
-      background: rgba(var(--color-green-rgb), 0.07);
+      background: color-mix(in srgb, var(--conflict-manager-insert) 7%, transparent);
 
       .highlight-soft {
-        background: rgba(var(--color-green-rgb), 0.15);
+        background: color-mix(in srgb, var(--conflict-manager-insert) 15%, transparent);
         border-radius: 2px;
         padding: 1px;
       }
 
       .highlight-strong {
-        background: rgba(var(--color-green-rgb), 0.40);
+        background: color-mix(in srgb, var(--conflict-manager-insert) 40%, transparent);
         border-radius: 2px;
         padding: 1px;
       }
@@ -180,6 +184,23 @@
     .collapse-dots  { opacity: 0.4; letter-spacing: 2px; }
     .collapse-label { flex: 1; }
     .collapse-action { font-weight: 600; color: var(--interactive-accent); }
+  }
+}
+
+/* Conflict Manager setting styles */
+.conflict-manager-settings {
+  .setting-item-heading {
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+
+  .color-grid {
+    display: grid;
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    column-gap: 24px;
   }
 }
 

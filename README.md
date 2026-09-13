@@ -15,36 +15,6 @@ Search [Conflict Manager](https://community.obsidian.md/plugins/conflict-manager
 
 ## FAQ
 
-#### How to change colors ?
-
-```css
-@media (prefers-color-scheme: light) {
-  .row-delete {
-    background: rgba(var(--color-red-rgb), 0.07);
-    .highlight-soft {
-      background: rgba(var(--color-red-rgb), 0.15);
-    }
-    .highlight-strong {
-      background: rgba(var(--color-red-rgb), 0.4);
-    }
-  }
-
-  .row-insert {
-    background: rgba(var(--color-green-rgb), 0.07);
-    .highlight-soft {
-      background: rgba(var(--color-green-rgb), 0.15);
-    }
-    .highlight-strong {
-      background: rgba(var(--color-green-rgb), 0.4);
-    }
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  /* same code for dark mode ... */
-}
-```
-
 #### When copying and pasting multiple lines in Obsidian, an extra line break is inserted.
 
 Go to Setting > Editor > Convert pasted HTML to Markdown > toggle Disable.

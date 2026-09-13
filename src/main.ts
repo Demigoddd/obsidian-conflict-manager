@@ -25,7 +25,10 @@ export default class ConflictManager extends Plugin {
     this.registerEvent(this.app.vault.on('rename', () => this.debouncedIndicatorUpdate()));
 
     // Conflict view
-    this.registerView(CONFLICT_MANAGER_VIEW_TYPE, (leaf) => new ConflictManagerView(leaf));
+    this.registerView(
+      CONFLICT_MANAGER_VIEW_TYPE,
+      (leaf) => new ConflictManagerView(leaf, this.settings),
+    );
 
     // Conflict notifier
     this.notifier = new ConflictManagerNotifier(
@@ -73,6 +76,12 @@ export default class ConflictManager extends Plugin {
         }
       });
     }
+  }
+
+  refreshDiffColors() {
+    this.app.workspace
+      .getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE)
+      .forEach((leaf) => (leaf.view as ConflictManagerView).applyColors());
   }
 
   async activateView(mainFile: TFile, conflictFiles: TFile[]) {
