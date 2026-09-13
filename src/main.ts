@@ -1,8 +1,9 @@
-import { Plugin, TFile, MarkdownView, WorkspaceLeaf, debounce } from 'obsidian';
+import { Plugin, TFile, MarkdownView, WorkspaceLeaf, Notice, debounce } from 'obsidian';
 import { DEFAULT_SETTINGS, ConflictManagerSettings, ConflictManagerSettingTab } from './settings';
 import { ConflictManagerView, CONFLICT_MANAGER_VIEW_TYPE } from './view';
 import { ConflictManagerNotifier } from './notifier';
 import { ConflictManagerIndicator } from './indicator';
+import { findConflictFiles } from './utils';
 
 export default class ConflictManager extends Plugin {
   settings!: ConflictManagerSettings;
@@ -29,6 +30,29 @@ export default class ConflictManager extends Plugin {
       CONFLICT_MANAGER_VIEW_TYPE,
       (leaf) => new ConflictManagerView(leaf, this.settings),
     );
+
+    // Commands
+    this.addCommand({
+      id: 'review-conflicts',
+      name: 'Review conflicts of the active note',
+      checkCallback: (checking: boolean) => {
+        const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+        const file = markdownView?.file;
+
+        if (!markdownView || !file) return false;
+        if (checking) return true;
+
+        const conflictFiles = findConflictFiles(file, this.settings.conflictFilePattern);
+
+        if (conflictFiles.length === 0) {
+          new Notice('Conflict manager: no conflicts found for this file');
+          return true;
+        }
+
+        void this.activateView(file, conflictFiles);
+        return true;
+      },
+    });
 
     // Conflict notifier
     this.notifier = new ConflictManagerNotifier(

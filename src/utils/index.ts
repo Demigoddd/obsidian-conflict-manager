@@ -1,3 +1,5 @@
+import { TFile } from 'obsidian';
+
 const escapeRegExp = (str: string): string => {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
@@ -20,4 +22,21 @@ const conflictRegExp = (prefix: string, pattern: string): RegExp => {
   return new RegExp(`^${prefix}[\\s\\.\\-\\(]+.*(?:${pattern}).*$`, 'i');
 };
 
-export { conflictRegExp, escapeRegExp };
+const findConflictFiles = (activeFile: TFile, conflictFilePattern: string): TFile[] => {
+  const { basename, extension, parent } = activeFile;
+
+  if (!parent || !conflictFilePattern.trim()) return [];
+
+  const escapedBasename = escapeRegExp(basename);
+  const userPattern = escapeRegExp(conflictFilePattern.trim());
+  const regex = conflictRegExp(escapedBasename, userPattern);
+
+  return parent.children.filter((child): child is TFile => {
+    if (!(child instanceof TFile)) return false;
+    if (child.extension !== extension) return false;
+    if (child.path === activeFile.path) return false;
+    return regex.test(child.basename);
+  });
+};
+
+export { conflictRegExp, escapeRegExp, findConflictFiles };

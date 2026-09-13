@@ -1,6 +1,6 @@
 import { MarkdownView, TFile, setIcon } from 'obsidian';
 import { ConflictManagerSettings } from './settings';
-import { conflictRegExp, escapeRegExp } from './utils';
+import { findConflictFiles } from './utils';
 
 export class ConflictManagerNotifier {
   private onReview: (mainFile: TFile, conflictFiles: TFile[]) => void;
@@ -14,21 +14,7 @@ export class ConflictManagerNotifier {
     settings: ConflictManagerSettings,
     activeFile: TFile,
   ): void {
-    const { basename, extension, parent } = activeFile;
-
-    if (!parent || !settings.conflictFilePattern?.trim())
-      return void this.closeConflictBanner(view);
-
-    const escapedBasename = escapeRegExp(basename);
-    const userPattern = escapeRegExp(settings.conflictFilePattern.trim());
-    const regex = conflictRegExp(escapedBasename, userPattern);
-    const conflictFiles: TFile[] = parent.children.filter((child): child is TFile => {
-      if (!(child instanceof TFile)) return false;
-      if (child.extension !== extension) return false;
-      if (child.path === activeFile.path) return false;
-      return regex.test(child.basename);
-    });
-
+    const conflictFiles = findConflictFiles(activeFile, settings.conflictFilePattern ?? '');
     this.createConflictBanner(view, activeFile, conflictFiles);
   }
 
