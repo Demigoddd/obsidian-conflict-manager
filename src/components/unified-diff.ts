@@ -157,8 +157,8 @@ export class UnifiedDiff {
     el.createSpan({ cls: 'collapse-action', text: 'Expand' });
 
     el.addEventListener('click', () => {
-      const tmp = window.activeDocument.createElement('div');
-      hidden.forEach((r) => this.paintRow(tmp as HTMLElement, r));
+      const tmp = createDiv();
+      hidden.forEach((r) => this.paintRow(tmp, r));
       while (tmp.firstChild) wrap.insertBefore(tmp.firstChild, el);
       el.remove();
     });

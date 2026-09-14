@@ -45,7 +45,6 @@ export class ConflictManagerSettingTab extends PluginSettingTab {
     const { containerEl } = this;
 
     containerEl.empty();
-    containerEl.addClass('conflict-manager-settings');
     this.colorPickers.clear();
 
     new Setting(containerEl)
@@ -73,14 +72,8 @@ export class ConflictManagerSettingTab extends PluginSettingTab {
         }),
       );
 
-    new Setting(containerEl)
-      .setName('Diff colors')
-      .setDesc('Colors of removed and added lines in the diff view')
-      .setHeading();
-
-    const grid = containerEl.createDiv({ cls: 'color-grid' });
-    this.addThemeColors(grid, 'Light theme', 'diffDeleteColorLight', 'diffInsertColorLight');
-    this.addThemeColors(grid, 'Dark theme', 'diffDeleteColorDark', 'diffInsertColorDark');
+    this.addThemeColors(containerEl, 'Light theme', 'diffDeleteColorLight', 'diffInsertColorLight');
+    this.addThemeColors(containerEl, 'Dark theme', 'diffDeleteColorDark', 'diffInsertColorDark');
   }
 
   private addThemeColors(

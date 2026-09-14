@@ -190,23 +190,6 @@
   }
 }
 
-/* Conflict Manager setting styles */
-.conflict-manager-settings {
-  .setting-item-heading {
-    border-bottom: 1px solid var(--background-modifier-border);
-    padding-bottom: 8px;
-    margin-bottom: 8px;
-  }
-
-  .color-grid {
-    display: grid;
-    grid-template-rows: repeat(3, auto);
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-    column-gap: 24px;
-  }
-}
-
 /* Conflict Manager indicator styles */
 .conflict-manager-indicator {
   display: inline-flex;

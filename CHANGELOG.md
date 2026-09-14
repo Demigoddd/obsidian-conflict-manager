@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-09-14
+
+### Changed
+
+- The settings tab is laid out as a plain vertical list: the "Diff colors" heading and the two-column colour grid are gone, leaving the "Light theme" and "Dark theme" sections with their restore-defaults buttons.
+- Build the conflict banner and the diff view with Obsidian's DOM helpers instead of `document.createElement`.
+
 ## [1.2.0] - 2026-09-14
 
 ### Added

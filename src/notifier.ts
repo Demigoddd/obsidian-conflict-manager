@@ -21,10 +21,9 @@ export class ConflictManagerNotifier {
   createConflictBanner(view: EditableFileView, activeFile: TFile, conflictFiles: TFile[]) {
     if (conflictFiles.length === 0) return void this.closeConflictBanner(view);
 
-    // Create banner
+    // Create banner at the very top of the editor view
     this.closeConflictBanner(view);
-    const banner = window.activeDocument.createElement('div');
-    banner.addClass('conflict-manager-banner');
+    const banner = view.contentEl.createDiv({ cls: 'conflict-manager-banner', prepend: true });
     banner.animate(
       [
         { opacity: 0, transform: 'translateY(-8px)' },
@@ -34,13 +33,13 @@ export class ConflictManagerNotifier {
     );
 
     // Set icon
-    const icon = banner.createEl('span', { cls: 'icon' });
+    const icon = banner.createSpan({ cls: 'icon' });
     setIcon(icon, 'alert-triangle');
 
     // Message container
     const bannerMessage = banner.createDiv({ cls: 'message' });
     bannerMessage.createEl('strong', { text: `${conflictFiles.length} ` });
-    bannerMessage.createEl('span', {
+    bannerMessage.createSpan({
       text: `unresolved conflict${conflictFiles.length > 1 ? 's' : ''} in this file`,
     });
 
@@ -55,9 +54,6 @@ export class ConflictManagerNotifier {
     const bannerCloseButton = bannerActions.createEl('button', { cls: 'button' });
     setIcon(bannerCloseButton, 'x');
     bannerCloseButton.onclick = () => this.closeConflictBanner(view);
-
-    // Insert the banner at the very top of the editor view
-    view.contentEl.prepend(banner);
   }
 
   closeConflictBanner(view: EditableFileView) {
