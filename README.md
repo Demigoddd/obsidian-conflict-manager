@@ -20,7 +20,7 @@ A simple plugin for conflict resolution. No more hunting through your file syste
 <details>
 <summary>When copying and pasting multiple lines in Obsidian, an extra line break is inserted.</summary>
 
-Go to **Settings → Editor → Convert pasted HTML to Markdown** and toggle it **off**.
+Go to **Settings > Editor > Convert pasted HTML to Markdown** and toggle it **off**.
 
 </details>
 
