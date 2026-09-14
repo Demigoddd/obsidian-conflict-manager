@@ -23,7 +23,7 @@ export class ConflictManagerNotifier {
 
     // Create banner at the very top of the editor view
     this.closeConflictBanner(view);
-    const banner = view.contentEl.createDiv({ cls: 'conflict-manager-banner', prepend: true });
+    const banner = view.contentEl.createDiv({ cls: 'conflict-manager-banner' });
     banner.animate(
       [
         { opacity: 0, transform: 'translateY(-8px)' },
@@ -54,6 +54,8 @@ export class ConflictManagerNotifier {
     const bannerCloseButton = bannerActions.createEl('button', { cls: 'button' });
     setIcon(bannerCloseButton, 'x');
     bannerCloseButton.onclick = () => this.closeConflictBanner(view);
+
+    view.contentEl.prepend(banner);
   }
 
   closeConflictBanner(view: EditableFileView) {
