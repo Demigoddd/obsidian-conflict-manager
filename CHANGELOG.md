@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-14
+
+### Added
+
+- New command "Review conflicts of the active file" that opens the diff view for the current file, or shows a notice when no conflicts are found.
+- Diff colors are now configurable in the settings: separate colors for deletions and additions in light and dark themes.
+- Conflicts are now detected for more than markdown notes: base, canvas files also get the banner, the status bar count and the diff view.
+
+### Fixed
+
+- The status bar no longer counts a file as conflicted just because a same-named file in another folder has a conflict copy; the original is now resolved as an actual sibling file.
+
 ## [1.1.4] - 2026-06-27
 
 ### Fixed
