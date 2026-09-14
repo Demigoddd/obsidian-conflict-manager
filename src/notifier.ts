@@ -1,4 +1,4 @@
-import { MarkdownView, TFile, setIcon } from 'obsidian';
+import { EditableFileView, TFile, setIcon } from 'obsidian';
 import { ConflictManagerSettings } from './settings';
 import { findConflictFiles } from './utils';
 
@@ -10,7 +10,7 @@ export class ConflictManagerNotifier {
   }
 
   checkAndNotifyConflicts(
-    view: MarkdownView,
+    view: EditableFileView,
     settings: ConflictManagerSettings,
     activeFile: TFile,
   ): void {
@@ -18,7 +18,7 @@ export class ConflictManagerNotifier {
     this.createConflictBanner(view, activeFile, conflictFiles);
   }
 
-  createConflictBanner(view: MarkdownView, activeFile: TFile, conflictFiles: TFile[]) {
+  createConflictBanner(view: EditableFileView, activeFile: TFile, conflictFiles: TFile[]) {
     if (conflictFiles.length === 0) return void this.closeConflictBanner(view);
 
     // Create banner
@@ -41,7 +41,7 @@ export class ConflictManagerNotifier {
     const bannerMessage = banner.createDiv({ cls: 'message' });
     bannerMessage.createEl('strong', { text: `${conflictFiles.length} ` });
     bannerMessage.createEl('span', {
-      text: `unresolved conflict${conflictFiles.length > 1 ? 's' : ''} in this note`,
+      text: `unresolved conflict${conflictFiles.length > 1 ? 's' : ''} in this file`,
     });
 
     // Banner Actions
@@ -60,7 +60,7 @@ export class ConflictManagerNotifier {
     view.contentEl.prepend(banner);
   }
 
-  closeConflictBanner(view: MarkdownView) {
+  closeConflictBanner(view: EditableFileView) {
     view.contentEl.querySelector('.conflict-manager-banner')?.remove();
   }
 }

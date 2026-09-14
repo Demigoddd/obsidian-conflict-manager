@@ -1,8 +1,6 @@
-import { TFile } from 'obsidian';
+import { TFile, Vault } from 'obsidian';
 
-const escapeRegExp = (str: string): string => {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-};
+const SUPPORTED_EXTENSIONS = new Set(['md', 'base', 'canvas']);
 
 /*
  * Generate a secure Regex with the user's word
@@ -22,10 +20,15 @@ const conflictRegExp = (prefix: string, pattern: string): RegExp => {
   return new RegExp(`^${prefix}[\\s\\.\\-\\(]+.*(?:${pattern}).*$`, 'i');
 };
 
+const escapeRegExp = (str: string): string => {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 const findConflictFiles = (activeFile: TFile, conflictFilePattern: string): TFile[] => {
   const { basename, extension, parent } = activeFile;
 
-  if (!parent || !conflictFilePattern.trim()) return [];
+  if (!parent || !conflictFilePattern.trim() || !SUPPORTED_EXTENSIONS.has(extension.toLowerCase()))
+    return [];
 
   const escapedBasename = escapeRegExp(basename);
   const userPattern = escapeRegExp(conflictFilePattern.trim());
@@ -39,4 +42,33 @@ const findConflictFiles = (activeFile: TFile, conflictFilePattern: string): TFil
   });
 };
 
-export { conflictRegExp, escapeRegExp, findConflictFiles };
+// Inverse of findConflictFiles
+const findOriginalFiles = (vault: Vault, conflictFilePattern: string): TFile[] => {
+  const userPattern = escapeRegExp(conflictFilePattern.trim());
+
+  if (!userPattern) return [];
+
+  const regex = conflictRegExp('(.+)', userPattern);
+  const originals = new Map<string, TFile>();
+
+  for (const file of vault.getFiles()) {
+    if (!SUPPORTED_EXTENSIONS.has(file.extension.toLowerCase())) continue;
+
+    const originalName = regex.exec(file.basename)?.[1]?.trim();
+
+    if (!originalName) continue;
+
+    const folder = file.parent?.path;
+    const originalPath =
+      folder && folder !== '/'
+        ? `${folder}/${originalName}.${file.extension}`
+        : `${originalName}.${file.extension}`;
+    const original = vault.getFileByPath(originalPath);
+
+    if (original) originals.set(original.path, original);
+  }
+
+  return [...originals.values()];
+};
+
+export { SUPPORTED_EXTENSIONS, conflictRegExp, escapeRegExp, findConflictFiles, findOriginalFiles };

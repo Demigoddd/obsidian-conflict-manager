@@ -1,7 +1,7 @@
-import { Menu, Notice, TFile, setIcon, setTooltip } from 'obsidian';
+import { Menu, Notice, setIcon, setTooltip } from 'obsidian';
 import ConflictManager from './main';
 import { ConflictManagerSettings } from './settings';
-import { conflictRegExp, escapeRegExp } from './utils';
+import { escapeRegExp, findOriginalFiles } from './utils';
 
 type ConflictManagerIndicatorStage = 'hide' | 'success' | 'conflict' | 'info';
 
@@ -44,13 +44,16 @@ export class ConflictManagerIndicator {
       return;
     }
 
-    const conflictFiles = this.getOriginalConflictFiles();
+    const originalConflictFiles = findOriginalFiles(
+      this.plugin.app.vault,
+      this.settings.conflictFilePattern ?? '',
+    );
 
-    if (conflictFiles.length > 0) {
+    if (originalConflictFiles.length > 0) {
       setIcon(this.indicatorEl, 'alert-triangle');
       setTooltip(
         this.indicatorEl,
-        `Conflict manager: ${conflictFiles.length} unresolved conflicts`,
+        `Conflict manager: ${originalConflictFiles.length} unresolved conflicts`,
         { delay: 300, placement: 'top' },
       );
       this.indicatorEl.addClass('conflict');
@@ -82,7 +85,7 @@ export class ConflictManagerIndicator {
 
   private triggerGlobalSearch() {
     try {
-      const query = `file:/${this.getOriginalConflictFilesQuery().source}/`;
+      const query = `path:/${this.getOriginalFilesQuery().source}/`;
 
       const appWithInternalPlugins = this.plugin.app as {
         internalPlugins?: {
@@ -150,31 +153,15 @@ export class ConflictManagerIndicator {
     }
   }
 
-  private getOriginalConflictFiles(): TFile[] {
-    const query = this.getOriginalConflictFilesQuery();
-    return this.plugin.app.vault.getMarkdownFiles().filter((file) => query.test(file.basename));
-  }
-
-  private getOriginalConflictFilesQuery(): RegExp {
-    const userPattern = escapeRegExp(this.settings.conflictFilePattern?.trim() || '');
-    const extractOriginalRegex = new RegExp(`^(.+)[\\s\\.\\-\\(]+.*(?:${userPattern}).*$`, 'i');
-    const originalNames = this.plugin.app.vault
-      .getMarkdownFiles()
-      .map((file) => extractOriginalRegex.exec(file.basename)?.[1]?.trim() ?? null)
-      .filter((name): name is string => !!name);
-    const uniqueNames = [...new Set(originalNames)];
-    const escapedNames = uniqueNames.map((name) => escapeRegExp(name)).join('|');
-    return new RegExp(`(?:^|\\/)(?:${escapedNames})(?:\\.md)?$`, 'i');
-  }
-
-  private getConflictFiles(): TFile[] {
-    const query = this.getConflictFilesQuery();
-    return this.plugin.app.vault.getMarkdownFiles().filter((file) => query.test(file.basename));
-  }
-
-  private getConflictFilesQuery(): RegExp {
-    const anyPattern = '.+';
-    const userPattern = escapeRegExp(this.settings.conflictFilePattern?.trim() || '');
-    return conflictRegExp(anyPattern, userPattern);
+  private getOriginalFilesQuery(): RegExp {
+    const paths = [
+      ...new Set(
+        findOriginalFiles(this.plugin.app.vault, this.settings.conflictFilePattern ?? '').map(
+          (file) => file.path,
+        ),
+      ),
+    ];
+    const escapedPaths = paths.map((path) => escapeRegExp(path).replace(/\//g, '\\/')).join('|');
+    return new RegExp(`^(?:${escapedPaths})$`, 'i');
   }
 }

@@ -1,4 +1,12 @@
-import { Plugin, TFile, MarkdownView, WorkspaceLeaf, Notice, debounce } from 'obsidian';
+import {
+  Plugin,
+  TFile,
+  EditableFileView,
+  FileView,
+  WorkspaceLeaf,
+  Notice,
+  debounce,
+} from 'obsidian';
 import { DEFAULT_SETTINGS, ConflictManagerSettings, ConflictManagerSettingTab } from './settings';
 import { ConflictManagerView, CONFLICT_MANAGER_VIEW_TYPE } from './view';
 import { ConflictManagerNotifier } from './notifier';
@@ -34,12 +42,12 @@ export default class ConflictManager extends Plugin {
     // Commands
     this.addCommand({
       id: 'review-conflicts',
-      name: 'Review conflicts of the active note',
+      name: 'Review conflicts of the active file',
       checkCallback: (checking: boolean) => {
-        const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-        const file = markdownView?.file;
+        const fileView = this.app.workspace.getActiveViewOfType(EditableFileView);
+        const file = fileView?.file;
 
-        if (!markdownView || !file) return false;
+        if (!fileView || !file) return false;
         if (checking) return true;
 
         const conflictFiles = findConflictFiles(file, this.settings.conflictFilePattern);
@@ -61,8 +69,8 @@ export default class ConflictManager extends Plugin {
     this.registerEvent(
       this.app.workspace.on('file-open', (file: TFile | null) => {
         if (!file) return;
-        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-        if (view) this.notifier.checkAndNotifyConflicts(view, this.settings, file);
+        const fileView = this.app.workspace.getActiveViewOfType(EditableFileView);
+        if (fileView) this.notifier.checkAndNotifyConflicts(fileView, this.settings, file);
       }),
     );
 
@@ -75,14 +83,13 @@ export default class ConflictManager extends Plugin {
       // Update status bar indicator
       this.indicator.update();
 
-      // Add banners to all open notes
+      // Add banners to all open files
       if (this.notifier) {
-        this.app.workspace.getLeavesOfType('markdown').forEach((leaf) => {
-          const view = leaf.view as MarkdownView;
-          const file = view.file;
+        this.app.workspace.iterateAllLeaves((leaf) => {
+          const view = leaf.view;
 
-          if (view && file && file instanceof TFile) {
-            this.notifier.checkAndNotifyConflicts(view, this.settings, file);
+          if (view instanceof EditableFileView && view.file instanceof TFile) {
+            this.notifier.checkAndNotifyConflicts(view, this.settings, view.file);
           }
         });
       }
@@ -90,12 +97,12 @@ export default class ConflictManager extends Plugin {
   }
 
   onunload() {
-    // Remove banners from all open notes
+    // Remove banners from all open files
     if (this.notifier) {
-      this.app.workspace.getLeavesOfType('markdown').forEach((leaf) => {
+      this.app.workspace.iterateAllLeaves((leaf) => {
         const view = leaf.view;
 
-        if (view instanceof MarkdownView) {
+        if (view instanceof FileView) {
           this.notifier.closeConflictBanner(view);
         }
       });
@@ -112,7 +119,7 @@ export default class ConflictManager extends Plugin {
     const { workspace } = this.app;
     let leaf: WorkspaceLeaf | null = null;
     const leaves = workspace.getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE);
-    const markdownView = workspace.getActiveViewOfType(MarkdownView);
+    const fileView = this.app.workspace.getActiveViewOfType(EditableFileView);
 
     // If view already exists, use it
     // Otherwise, create a new tab in the main area
@@ -122,7 +129,7 @@ export default class ConflictManager extends Plugin {
     // Pass the files to the view via state
     await workspace.revealLeaf(leaf);
     (leaf.view as ConflictManagerView).setFiles(mainFile, conflictFiles, (conflictFiles) => {
-      if (markdownView) this.notifier.createConflictBanner(markdownView, mainFile, conflictFiles);
+      if (fileView) this.notifier.createConflictBanner(fileView, mainFile, conflictFiles);
     });
   }
 }
