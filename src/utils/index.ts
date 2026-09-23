@@ -36,7 +36,7 @@ const findConflictFiles = (activeFile: TFile, conflictFilePattern: string): TFil
 
   return parent.children.filter((child): child is TFile => {
     if (!(child instanceof TFile)) return false;
-    if (child.extension !== extension) return false;
+    if (child.extension.toLowerCase() !== extension.toLowerCase()) return false;
     if (child.path === activeFile.path) return false;
     return regex.test(child.basename);
   });
@@ -49,9 +49,11 @@ const findOriginalFiles = (vault: Vault, conflictFilePattern: string): TFile[] =
   if (!userPattern) return [];
 
   const regex = conflictRegExp('(.+)', userPattern);
+  const files = vault.getFiles();
+  const filesByPath = new Map<string, TFile>(files.map((file) => [file.path.toLowerCase(), file]));
   const originals = new Map<string, TFile>();
 
-  for (const file of vault.getFiles()) {
+  for (const file of files) {
     if (!SUPPORTED_EXTENSIONS.has(file.extension.toLowerCase())) continue;
 
     const originalName = regex.exec(file.basename)?.[1]?.trim();
@@ -63,9 +65,9 @@ const findOriginalFiles = (vault: Vault, conflictFilePattern: string): TFile[] =
       folder && folder !== '/'
         ? `${folder}/${originalName}.${file.extension}`
         : `${originalName}.${file.extension}`;
-    const original = vault.getFileByPath(originalPath);
+    const original = filesByPath.get(originalPath.toLowerCase());
 
-    if (original) originals.set(original.path, original);
+    if (original && original.path !== file.path) originals.set(original.path, original);
   }
 
   return [...originals.values()];

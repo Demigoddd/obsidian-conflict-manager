@@ -9,6 +9,7 @@ import {
 } from 'obsidian';
 import { DEFAULT_SETTINGS, ConflictManagerSettings, ConflictManagerSettingTab } from './settings';
 import { ConflictManagerView, CONFLICT_MANAGER_VIEW_TYPE } from './view';
+import { ConflictHubView, CONFLICT_HUB_VIEW_TYPE, CONFLICT_HUB_VIEW_ICON } from './hub';
 import { ConflictManagerNotifier } from './notifier';
 import { ConflictManagerIndicator } from './indicator';
 import { findConflictFiles } from './utils';
@@ -17,7 +18,7 @@ export default class ConflictManager extends Plugin {
   settings!: ConflictManagerSettings;
   notifier!: ConflictManagerNotifier;
   indicator!: ConflictManagerIndicator;
-  private debouncedIndicatorUpdate = debounce(() => this.indicator.update(), 500, true);
+  private debouncedIndicatorUpdate = debounce(() => this.refreshIndicators(), 500, true);
 
   async onload() {
     // Setting
@@ -38,6 +39,10 @@ export default class ConflictManager extends Plugin {
       CONFLICT_MANAGER_VIEW_TYPE,
       (leaf) => new ConflictManagerView(leaf, this.settings),
     );
+
+    // Conflict hub
+    this.registerView(CONFLICT_HUB_VIEW_TYPE, (leaf) => new ConflictHubView(leaf, this.settings));
+    this.addRibbonIcon(CONFLICT_HUB_VIEW_ICON, 'Conflict hub', () => void this.activateHub());
 
     // Commands
     this.addCommand({
@@ -61,6 +66,11 @@ export default class ConflictManager extends Plugin {
         return true;
       },
     });
+    this.addCommand({
+      id: 'open-conflict-hub',
+      name: 'Open conflict hub',
+      callback: () => void this.activateHub(),
+    });
 
     // Conflict notifier
     this.notifier = new ConflictManagerNotifier(
@@ -80,8 +90,8 @@ export default class ConflictManager extends Plugin {
       const existingLeaves = this.app.workspace.getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE);
       existingLeaves.forEach((leaf) => leaf.detach());
 
-      // Update status bar indicator
-      this.indicator.update();
+      // Update status bar indicator and hub
+      this.refreshIndicators();
 
       // Add banners to all open files
       if (this.notifier) {
@@ -107,6 +117,25 @@ export default class ConflictManager extends Plugin {
         }
       });
     }
+  }
+
+  refreshIndicators() {
+    this.indicator.update();
+    this.app.workspace
+      .getLeavesOfType(CONFLICT_HUB_VIEW_TYPE)
+      .forEach((leaf) => (leaf.view as ConflictHubView).refresh());
+  }
+
+  async activateHub() {
+    const { workspace } = this.app;
+    const leaf =
+      workspace.getLeavesOfType(CONFLICT_HUB_VIEW_TYPE)[0] ?? workspace.getRightLeaf(false);
+
+    if (!leaf) return;
+
+    await leaf.setViewState({ type: CONFLICT_HUB_VIEW_TYPE, active: true });
+    await workspace.revealLeaf(leaf);
+    (leaf.view as ConflictHubView).refresh();
   }
 
   refreshDiffColors() {

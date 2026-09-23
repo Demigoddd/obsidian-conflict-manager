@@ -1,7 +1,8 @@
-import { Menu, Notice, setIcon, setTooltip } from 'obsidian';
+import { Menu, setIcon, setTooltip } from 'obsidian';
 import ConflictManager from './main';
+import { CONFLICT_HUB_VIEW_ICON } from './hub';
 import { ConflictManagerSettings } from './settings';
-import { escapeRegExp, findOriginalFiles } from './utils';
+import { findOriginalFiles } from './utils';
 
 type ConflictManagerIndicatorStage = 'hide' | 'success' | 'conflict' | 'info';
 
@@ -75,49 +76,12 @@ export class ConflictManagerIndicator {
       if (this.stage === 'info') {
         void this.openSettingsTab();
       } else if (this.stage === 'conflict') {
-        this.triggerGlobalSearch();
+        void this.plugin.activateHub();
       }
     });
     this.indicatorEl.addEventListener('contextmenu', (evt: MouseEvent) => {
       this.showContextMenu(evt);
     });
-  }
-
-  private triggerGlobalSearch() {
-    try {
-      const query = `path:/${this.getOriginalFilesQuery().source}/`;
-
-      const appWithInternalPlugins = this.plugin.app as {
-        internalPlugins?: {
-          plugins?: Record<
-            string,
-            {
-              instance?: {
-                openGlobalSearch: (query: string) => void;
-              };
-            }
-          >;
-        };
-        commands?: {
-          executeCommandById: (id: string) => void;
-        };
-      };
-      const globalSearchPlugin = appWithInternalPlugins.internalPlugins?.plugins?.['global-search'];
-
-      if (globalSearchPlugin?.instance) {
-        globalSearchPlugin.instance.openGlobalSearch(query);
-      } else if (appWithInternalPlugins.commands?.executeCommandById) {
-        appWithInternalPlugins.commands.executeCommandById('global-search:open');
-      } else {
-        new Notice('Conflict manager: global search is unavailable');
-      }
-
-      new Notice('Conflict manager: trigger global search for conflicts');
-    } catch (error: unknown) {
-      const err = error instanceof Error ? error : new Error(String(error));
-      console.error('Conflict manager: failed to open global search', err);
-      new Notice('Conflict manager: failed to open global search automatically');
-    }
   }
 
   private showContextMenu(evt: MouseEvent) {
@@ -129,6 +93,12 @@ export class ConflictManagerIndicator {
       item.setTitle('Conflict ' + 'Manager').setDisabled(true);
     });
     menu.addSeparator();
+    menu.addItem((item) => {
+      item
+        .setTitle('Open conflict hub')
+        .setIcon(CONFLICT_HUB_VIEW_ICON)
+        .onClick(() => void this.plugin.activateHub());
+    });
     menu.addItem((item) => {
       item
         .setTitle('Settings')
@@ -151,17 +121,5 @@ export class ConflictManagerIndicator {
       await setting.open();
       await setting.openTabById(this.plugin.manifest.id);
     }
-  }
-
-  private getOriginalFilesQuery(): RegExp {
-    const paths = [
-      ...new Set(
-        findOriginalFiles(this.plugin.app.vault, this.settings.conflictFilePattern ?? '').map(
-          (file) => file.path,
-        ),
-      ),
-    ];
-    const escapedPaths = paths.map((path) => escapeRegExp(path).replace(/\//g, '\\/')).join('|');
-    return new RegExp(`^(?:${escapedPaths})$`, 'i');
   }
 }

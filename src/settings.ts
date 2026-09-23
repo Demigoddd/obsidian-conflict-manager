@@ -29,7 +29,7 @@ type ColorSetting =
 export class ConflictManagerSettingTab extends PluginSettingTab {
   plugin: ConflictManager;
   private colorPickers = new Map<ColorSetting, ColorComponent>();
-  private debouncedUpdate = debounce(() => this.plugin.indicator.update(), 500, true);
+  private debouncedUpdate = debounce(() => this.plugin.refreshIndicators(), 500, true);
   private debouncedSave = debounce(
     async () => await this.plugin.saveData(this.plugin.settings),
     500,

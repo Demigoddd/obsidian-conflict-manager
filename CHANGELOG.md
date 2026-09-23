@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-23
+
+### Added
+
+- Conflict Hub: a side panel listing every file in the vault that still has conflict copies, with the number of copies per file. Click an entry to open the file; a refresh button re-scans the vault.
+- The hub opens from a new ribbon icon, the new "Open conflict hub" command, or the status bar context menu.
+- README now has "Setup" and "Commands" sections.
+
+### Changed
+
+- Clicking the status bar indicator opens the Conflict Hub instead of a global search.
+- The hub refreshes together with the status bar when files are created, deleted, renamed, or when the conflict pattern changes.
+
+### Fixed
+
+- Conflict detection now ignores letter case in file extensions and original file paths.
+- A file is no longer reported as its own original.
+
 ## [1.2.3] - 2026-09-14
 
 ### Fixed
