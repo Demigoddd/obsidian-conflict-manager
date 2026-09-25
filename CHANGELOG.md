@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-09-25
+
 ### Added
 
 - New command "Merge conflicts in config files": finds conflict copies of Obsidian settings, plugin settings, themes and CSS snippets in `.obsidian` and merges them the same way Obsidian Sync does. You confirm the list first, and old versions go to trash.
