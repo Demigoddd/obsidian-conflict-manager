@@ -1,6 +1,7 @@
 import { TFile, Vault } from 'obsidian';
 
 const SUPPORTED_EXTENSIONS = new Set(['md', 'base', 'canvas']);
+const DELIMITER = /[\s.\-(]/;
 
 /*
  * Generate a secure Regex with the user's word
@@ -17,7 +18,7 @@ const SUPPORTED_EXTENSIONS = new Set(['md', 'base', 'canvas']);
  * | iCloud Drive  | version selection dialog (no separate file)    |
  */
 const conflictRegExp = (prefix: string, pattern: string): RegExp => {
-  return new RegExp(`^${prefix}[\\s\\.\\-\\(]+.*(?:${pattern}).*$`, 'i');
+  return new RegExp(`^${prefix}${DELIMITER.source}+.*(?:${pattern}).*$`, 'i');
 };
 
 const escapeRegExp = (str: string): string => {
@@ -48,29 +49,31 @@ const findOriginalFiles = (vault: Vault, conflictFilePattern: string): TFile[] =
 
   if (!userPattern) return [];
 
-  const regex = conflictRegExp('(.+)', userPattern);
-  const files = vault.getFiles();
-  const filesByPath = new Map<string, TFile>(files.map((file) => [file.path.toLowerCase(), file]));
-  const originals = new Map<string, TFile>();
+  const containsPattern = new RegExp(userPattern, 'i');
+  const files = vault
+    .getFiles()
+    .filter((file) => SUPPORTED_EXTENSIONS.has(file.extension.toLowerCase()));
+  const filesByPath = new Map(files.map((file) => [file.path.toLowerCase(), file]));
+  const originals = new Set<TFile>();
 
-  for (const file of files) {
-    if (!SUPPORTED_EXTENSIONS.has(file.extension.toLowerCase())) continue;
+  files
+    .filter((copy) => containsPattern.test(copy.basename))
+    .forEach(({ basename, extension, name, path }) => {
+      // "folder/" or "" for the vault root
+      const folder = path.slice(0, -name.length);
 
-    const originalName = regex.exec(file.basename)?.[1]?.trim();
+      for (let index = 1; index < basename.length; index++) {
+        if (!DELIMITER.test(basename[index]!)) continue;
 
-    if (!originalName) continue;
+        const prefix = basename.slice(0, index);
+        const original = filesByPath.get(`${folder}${prefix}.${extension}`.toLowerCase());
 
-    const folder = file.parent?.path;
-    const originalPath =
-      folder && folder !== '/'
-        ? `${folder}/${originalName}.${file.extension}`
-        : `${originalName}.${file.extension}`;
-    const original = filesByPath.get(originalPath.toLowerCase());
+        if (original && conflictRegExp(escapeRegExp(prefix), userPattern).test(basename))
+          originals.add(original);
+      }
+    });
 
-    if (original && original.path !== file.path) originals.set(original.path, original);
-  }
-
-  return [...originals.values()];
+  return [...originals];
 };
 
 export { SUPPORTED_EXTENSIONS, conflictRegExp, escapeRegExp, findConflictFiles, findOriginalFiles };
