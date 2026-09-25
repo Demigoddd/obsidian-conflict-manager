@@ -1,5 +1,5 @@
 import { EditableFileView, TFile, setIcon } from 'obsidian';
-import { ConflictManagerSettings } from './settings';
+import { IConflictManagerSettings } from './settings';
 import { findConflictFiles } from './utils';
 
 // The element the banner is prepended to, per view type.
@@ -19,7 +19,7 @@ export class ConflictManagerNotifier {
 
   checkAndNotifyConflicts(
     view: EditableFileView,
-    settings: ConflictManagerSettings,
+    settings: IConflictManagerSettings,
     activeFile: TFile,
   ): void {
     const conflictFiles = findConflictFiles(activeFile, settings.conflictFilePattern ?? '');

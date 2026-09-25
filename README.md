@@ -9,6 +9,7 @@ A simple plugin for conflict resolution. No more hunting through your file syste
 - **Diff Viewer:** Review differences between the original file and conflict files using an intuitive split-pane layout.
 - **Status Bar Indicator:** Quickly view the status of conflicts in the vault.
 - **Conflict Hub:** A side panel listing every file in the vault that still has conflict copies, opened from the ribbon icon.
+- **Config Merge:** Merges conflict copies of Obsidian settings, plugin settings, themes and CSS snippets. See the [FAQ](#config-file-conflicts).
 
 ## Installation
 
@@ -28,8 +29,39 @@ Commands are available from the command palette (`Ctrl/Cmd + P`) and can be boun
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | **Conflict manager: Open conflict hub**                   | Opens the Conflict Hub panel with all unresolved conflicts in the vault. Same as the ribbon icon.         | Conflict file pattern               |
 | **Conflict manager: Review conflicts of the active file** | Opens the diff viewer for the active file. If the file has no conflict copies, a notice is shown instead. | Conflict file pattern, an open file |
+| **Conflict manager: Merge conflicts in config files**     | Merges conflict copies of settings files after you confirm.                                               | "Config conflicts" turned on        |
 
 ## FAQ
+
+<a id="config-file-conflicts"></a>
+
+<details>
+<summary>How do I merge conflict copies of config files?</summary>
+
+Sync services like Dropbox, Google Drive or Syncthing can also create conflict copies of Obsidian's own settings in the `.obsidian` folder. The plugin can merge them for you.
+
+**Turn it on:** **Settings > Conflict Manager > Config conflicts**. Then run the **Merge conflicts in config files** command or click the merge button in the Conflict Hub. The number on the button shows how many settings files have conflicts.
+
+**Checked files:**
+
+- `.obsidian/*.json` (except `workspace.json` and `workspace-mobile.json`)
+- `.obsidian/plugins/*/data.json`
+- `.obsidian/themes/*/manifest.json` and `theme.css`
+- `.obsidian/snippets/*.css`
+
+**How files are merged** (the same way [Obsidian Sync](https://obsidian.md/help/sync/troubleshoot#How+Obsidian+Sync+handles+conflicts) does it):
+
+- **Settings files:** settings from all versions are combined. If a setting is different, the newest version wins.
+- **Themes, CSS snippets and lists** like `community-plugins.json`: the newest version is kept.
+- **Broken files** are skipped.
+
+Nothing changes until you confirm: you see the list of files and choose which ones to merge. Old versions go to trash. The previous original is named `<name>.old` there.
+After merging, **reload** Obsidian so plugins pick up the new settings.
+
+> [!WARNING]
+> Settings files can contain private data like tokens. If the system trash is not available, old versions go to the vault's `.trash` folder, which your sync service or Git may upload. You don't need this with Obsidian Sync: it never creates conflict copies of settings.
+
+</details>
 
 <details>
 <summary>When copying and pasting multiple lines in Obsidian, an extra line break is inserted.</summary>

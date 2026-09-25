@@ -16,6 +16,29 @@
   --conflict-manager-insert: var(--conflict-manager-insert-dark, var(--color-green));
 }
 
+.conflict-manager-reload-button {
+  display: block;
+  width: 100%;
+  margin-top: var(--size-4-2);
+  padding: var(--size-4-1) var(--size-4-3);
+  border: none;
+  border-radius: var(--button-radius);
+  box-shadow: none;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-weight: var(--font-semibold);
+  cursor: var(--cursor);
+
+  &:hover {
+    background-color: var(--interactive-accent-hover);
+  }
+}
+
+.conflict-manager-warning {
+  color: var(--text-error);
+}
+
+
 /* Conflict Manager banner styles */
 .conflict-manager-banner {
   position: relative;
@@ -242,6 +265,25 @@
       font-size: var(--font-ui-smaller);
       color: var(--text-muted);
     }
+
+    .merge-button {
+      position: relative;
+    }
+
+    .merge-badge {
+      position: absolute;
+      top: -2px;
+      right: -4px;
+      min-width: 14px;
+      padding: 0 3px;
+      border-radius: var(--radius-l);
+      background-color: var(--interactive-accent);
+      color: var(--text-on-accent);
+      font-size: 10px;
+      line-height: 14px;
+      text-align: center;
+      pointer-events: none;
+    }
   }
 
   .empty-text {
@@ -311,5 +353,111 @@
       font-size: var(--font-ui-smaller);
       color: var(--text-muted);
     }
+  }
+}
+
+/* Config merge modal */
+.modal.conflict-manager-config-modal {
+  overflow: hidden;
+
+  .modal-content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--size-4-3);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .description {
+    margin: 0;
+    font-size: var(--font-ui-small);
+    color: var(--text-muted);
+  }
+
+  .config-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding: var(--size-4-1) 0;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-m);
+  }
+
+  .section {
+    padding: var(--size-4-2) var(--size-4-3) var(--size-4-1);
+    font-size: var(--font-ui-smaller);
+    color: var(--text-faint);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--size-4-2);
+    padding: var(--size-4-1) var(--size-4-3);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--background-modifier-hover);
+    }
+
+    &.is-disabled {
+      opacity: 0.5;
+      cursor: default;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    &.select-all {
+      padding-top: 0;
+      padding-bottom: 0;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    input {
+      flex-shrink: 0;
+      margin: 0;
+    }
+
+    .info {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .name,
+    .copy {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .name {
+      font-size: var(--font-ui-small);
+    }
+
+    .copy {
+      font-size: var(--font-ui-smaller);
+      color: var(--text-faint);
+    }
+
+    .meta {
+      flex-shrink: 0;
+      font-size: var(--font-ui-smaller);
+      color: var(--text-muted);
+    }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--size-4-2);
   }
 }

@@ -1,18 +1,18 @@
 import { Menu, setIcon, setTooltip } from 'obsidian';
 import ConflictManager from './main';
 import { CONFLICT_HUB_VIEW_ICON } from './hub';
-import { ConflictManagerSettings } from './settings';
+import { IConflictManagerSettings } from './settings';
 import { findOriginalFiles } from './utils';
 
 type ConflictManagerIndicatorStage = 'hide' | 'success' | 'conflict' | 'info';
 
 export class ConflictManagerIndicator {
   plugin: ConflictManager;
-  settings: ConflictManagerSettings;
+  settings: IConflictManagerSettings;
   private indicatorEl!: HTMLElement;
   private stage: ConflictManagerIndicatorStage = 'hide';
 
-  constructor(plugin: ConflictManager, settings: ConflictManagerSettings) {
+  constructor(plugin: ConflictManager, settings: IConflictManagerSettings) {
     this.plugin = plugin;
     this.settings = settings;
     this.indicatorEl = this.plugin.addStatusBarItem();
