@@ -72,7 +72,7 @@ Go to **Settings > Editor > Convert pasted HTML to Markdown** and toggle it **of
 
 ## Releasing
 
-1. Update the version in `manifest.json`, `package.json` and `versions.json`.
+1. Update the version in `manifest.json`, `package.json`, `package-lock.json` and `versions.json`.
 2. Commit the change:
    ```bash
    git commit -m "chore: prepare version <current_version>"
