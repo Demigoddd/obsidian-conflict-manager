@@ -5,13 +5,19 @@
 .theme-light {
   --banner-background: #fffad6;
   --banner-text-color: #5c4400;
-  --conflict-manager-delete: var(--conflict-manager-delete-light, var(--color-red));
-  --conflict-manager-insert: var(--conflict-manager-insert-light, var(--color-green));
 }
 
 .theme-dark {
   --banner-background: #3d2e00;
   --banner-text-color: #f5c842;
+}
+
+.theme-light .conflict-manager-view {
+  --conflict-manager-delete: var(--conflict-manager-delete-light, var(--color-red));
+  --conflict-manager-insert: var(--conflict-manager-insert-light, var(--color-green));
+}
+
+.theme-dark .conflict-manager-view {
   --conflict-manager-delete: var(--conflict-manager-delete-dark, var(--color-red));
   --conflict-manager-insert: var(--conflict-manager-insert-dark, var(--color-green));
 }

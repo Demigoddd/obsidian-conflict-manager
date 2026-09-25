@@ -159,9 +159,9 @@ export default class ConflictManager extends Plugin {
 
   refreshIndicators() {
     void this.indicator.update();
-    this.app.workspace
-      .getLeavesOfType(CONFLICT_HUB_VIEW_TYPE)
-      .forEach((leaf) => (leaf.view as ConflictHubView).refresh());
+    this.app.workspace.getLeavesOfType(CONFLICT_HUB_VIEW_TYPE).forEach((leaf) => {
+      if (leaf.view instanceof ConflictHubView) leaf.view.refresh();
+    });
   }
 
   async activateHub() {
@@ -173,7 +173,7 @@ export default class ConflictManager extends Plugin {
 
     await leaf.setViewState({ type: CONFLICT_HUB_VIEW_TYPE, active: true });
     await workspace.revealLeaf(leaf);
-    (leaf.view as ConflictHubView).refresh();
+    if (leaf.view instanceof ConflictHubView) leaf.view.refresh();
   }
 
   async mergeConfigConflicts() {
@@ -198,16 +198,15 @@ export default class ConflictManager extends Plugin {
   }
 
   refreshDiffColors() {
-    this.app.workspace
-      .getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE)
-      .forEach((leaf) => (leaf.view as ConflictManagerView).applyColors());
+    this.app.workspace.getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE).forEach((leaf) => {
+      if (leaf.view instanceof ConflictManagerView) leaf.view.applyColors();
+    });
   }
 
   async activateView(mainFile: TFile, conflictFiles: TFile[]) {
     const { workspace } = this.app;
     let leaf: WorkspaceLeaf | null = null;
     const leaves = workspace.getLeavesOfType(CONFLICT_MANAGER_VIEW_TYPE);
-    const fileView = this.app.workspace.getActiveViewOfType(EditableFileView);
 
     // If view already exists, use it
     // Otherwise, create a new tab in the main area
@@ -216,8 +215,15 @@ export default class ConflictManager extends Plugin {
 
     // Pass the files to the view via state
     await workspace.revealLeaf(leaf);
-    (leaf.view as ConflictManagerView).setFiles(mainFile, conflictFiles, (conflictFiles) => {
-      if (fileView) this.notifier.createConflictBanner(fileView, mainFile, conflictFiles);
+    if (!(leaf.view instanceof ConflictManagerView)) return;
+
+    // The leaf that opened the review may show another file by now, so look the views up again
+    leaf.view.setFiles(mainFile, conflictFiles, (conflictFiles) => {
+      workspace.iterateAllLeaves(({ view }) => {
+        if (view instanceof EditableFileView && view.file === mainFile) {
+          this.notifier.createConflictBanner(view, mainFile, conflictFiles);
+        }
+      });
     });
   }
 }

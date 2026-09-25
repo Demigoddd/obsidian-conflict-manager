@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, TFile, setIcon, Notice } from 'obsidian';
+import { ItemView, WorkspaceLeaf, TAbstractFile, TFile, setIcon, Notice } from 'obsidian';
 import { UnifiedDiff } from './components/unified-diff';
 import { DeleteConfirmModal } from './components/delete-confirm-modal';
 import { IConflictManagerSettings } from './settings';
@@ -12,6 +12,8 @@ export class ConflictManagerView extends ItemView {
   private currentIdx: number = -1;
   private onConflictsUpdated: ((conflictFiles: TFile[]) => void) | null = null;
   private updateNavInfo: () => void;
+  private viewEl: HTMLElement | null = null;
+  private renderId = 0;
 
   constructor(leaf: WorkspaceLeaf, settings: IConflictManagerSettings) {
     super(leaf);
@@ -48,24 +50,26 @@ export class ConflictManagerView extends ItemView {
     this.buildNav(navigation);
 
     // View
-    container.createDiv({ cls: 'view' });
+    this.viewEl = container.createDiv({ cls: 'view' });
     await this.renderDiff();
 
-    // Listening to changes in the main file for updating conflict file
+    // Re-render when either compared file changes; metadataCache reports markdown only
     this.registerEvent(
-      this.app.metadataCache.on(
-        'changed',
-        (file: TFile) => file === this.mainFile && void this.renderDiff(),
-      ),
+      this.app.vault.on('modify', (file: TAbstractFile) => {
+        if (file === this.mainFile || file === this.conflictFiles[this.currentIdx]) {
+          void this.renderDiff();
+        }
+      }),
     );
   }
 
   async onClose() {
     this.contentEl.empty();
+    this.viewEl = null;
   }
 
   applyColors() {
-    const { style } = this.contentEl.doc.body;
+    const { style } = this.contentEl;
     const { diffDeleteColorLight, diffInsertColorLight, diffDeleteColorDark, diffInsertColorDark } =
       this.settings;
 
@@ -101,6 +105,7 @@ export class ConflictManagerView extends ItemView {
       info.setText(total ? `${this.currentIdx + 1}/${total} - ${name}` : 'No conflicts');
       prev.disabled = total <= 1;
       nextButton.disabled = total <= 1;
+      deleteButton.disabled = total === 0;
     };
     this.updateNavInfo();
   }
@@ -134,42 +139,38 @@ export class ConflictManagerView extends ItemView {
         this.conflictFiles.splice(this.currentIdx, 1);
         this.onConflictsUpdated?.(this.conflictFiles);
 
-        if (this.conflictFiles.length === 0) {
-          this.containerEl.children[1]?.empty();
-          this.containerEl.children[1]?.createEl('h4', {
-            text: 'All conflicts resolved',
-            cls: 'empty-text',
-          });
-          return;
-        }
-
         if (this.currentIdx >= this.conflictFiles.length) {
           this.currentIdx = this.conflictFiles.length - 1;
         }
 
         this.updateNavInfo?.();
-        void this.renderDiff();
+        void this.renderDiff('All conflicts resolved');
       })();
     }).open();
   }
 
-  private async renderDiff() {
-    const container = this.containerEl.children[1];
-    if (!container) return;
+  private async renderDiff(emptyText = 'No conflicts') {
+    const renderId = ++this.renderId;
+    const view = this.viewEl;
 
-    const view = container.querySelector('.view') as HTMLElement;
     if (!view) return;
-    view.empty();
 
     const conflictFile = this.conflictFiles[this.currentIdx];
-    if (!this.mainFile || !conflictFile)
-      return void view.createEl('h4', { text: 'No conflicts', cls: 'empty-text' });
+
+    if (!this.mainFile || !conflictFile) {
+      view.empty();
+      view.createEl('h4', { text: emptyText, cls: 'empty-text' });
+      return;
+    }
 
     const [mainText, conflictText] = await Promise.all([
       this.app.vault.cachedRead(this.mainFile),
       this.app.vault.cachedRead(conflictFile),
     ]);
 
+    if (renderId !== this.renderId) return;
+
+    view.empty();
     UnifiedDiff.render(view, mainText, conflictText);
   }
 }
