@@ -99,6 +99,8 @@ export class ConflictManagerView extends ItemView {
       const total = this.conflictFiles.length;
       const name = this.conflictFiles[this.currentIdx]?.name ?? 'Unknown';
       info.setText(total ? `${this.currentIdx + 1}/${total} - ${name}` : 'No conflicts');
+      prev.disabled = total <= 1;
+      nextButton.disabled = total <= 1;
     };
     this.updateNavInfo();
   }

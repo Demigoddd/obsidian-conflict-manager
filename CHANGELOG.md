@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- With "Config conflicts" on, the status bar indicator now also counts conflicts in config files instead of showing "no conflicts detected".
+
 ## [1.4.0] - 2026-09-25
 
 ### Added

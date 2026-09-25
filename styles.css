@@ -120,6 +120,10 @@
     .previous-button, .next-button, .delete-button {
       cursor: pointer;
       color: var(--text-muted);
+
+      &:disabled {
+        cursor: default;
+      }
     }
   }
 

@@ -33,7 +33,7 @@ export default class ConflictManager extends Plugin {
     this.addSettingTab(new ConflictManagerSettingTab(this.app, this));
 
     // Setup StatusBar
-    this.indicator = new ConflictManagerIndicator(this, this.settings);
+    this.indicator = new ConflictManagerIndicator(this, this.settings, this.configMerger);
     this.registerEvent(this.app.vault.on('create', () => this.debouncedIndicatorUpdate()));
     this.registerEvent(this.app.vault.on('delete', () => this.debouncedIndicatorUpdate()));
     this.registerEvent(this.app.vault.on('rename', () => this.debouncedIndicatorUpdate()));
@@ -158,7 +158,7 @@ export default class ConflictManager extends Plugin {
   }
 
   refreshIndicators() {
-    this.indicator.update();
+    void this.indicator.update();
     this.app.workspace
       .getLeavesOfType(CONFLICT_HUB_VIEW_TYPE)
       .forEach((leaf) => (leaf.view as ConflictHubView).refresh());

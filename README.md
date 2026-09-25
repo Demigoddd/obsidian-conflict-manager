@@ -9,7 +9,7 @@ A simple plugin for conflict resolution. No more hunting through your file syste
 - **Diff Viewer:** Review differences between the original file and conflict files using an intuitive split-pane layout.
 - **Status Bar Indicator:** Quickly view the status of conflicts in the vault.
 - **Conflict Hub:** A side panel listing every file in the vault that still has conflict copies, opened from the ribbon icon.
-- **Config Merge:** Merges conflict copies of Obsidian settings, plugin settings, themes and CSS snippets. See the [FAQ](#config-file-conflicts).
+- **Config Conflict Resolution:** Resolves conflicting copies of your Obsidian settings, plugin data, themes and CSS snippets in one click. See the [FAQ](#config-file-conflicts).
 
 ## Installation
 
