@@ -25,6 +25,12 @@ export default tseslint.config(
     },
   },
   ...obsidianmd.configs.recommended,
+  {
+    files: ['tests/**/*.ts'],
+    rules: {
+      'obsidianmd/hardcoded-config-path': 'off',
+    },
+  },
   globalIgnores([
     'node_modules',
     'dist',

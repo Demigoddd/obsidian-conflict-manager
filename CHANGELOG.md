@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- New command "Merge conflicts in config files": finds conflict copies of Obsidian settings, plugin settings, themes and CSS snippets in `.obsidian` and merges them the same way Obsidian Sync does. You confirm the list first, and old versions go to trash.
+- Merge button in the Conflict Hub with the number of settings files that have conflicts.
+- "Config conflicts" setting to turn this on (off by default).
+
+### Fixed
+
+- A conflict copy now shows up only under its own note: `my-note (conflict)` belongs to `my-note`, not to `my`.
+
 ## [1.3.0] - 2026-09-23
 
 ### Added

@@ -1,18 +1,31 @@
-import { ItemView, Notice, TFile, WorkspaceLeaf, setIcon, setTooltip } from 'obsidian';
-import { ConflictManagerSettings } from './settings';
+import { ItemView, WorkspaceLeaf, setIcon, setTooltip } from 'obsidian';
+import { IConflictManagerSettings } from './settings';
 import { findConflictFiles, findOriginalFiles } from './utils';
+import { ConfigMerger } from './utils/config-merge';
 
 export const CONFLICT_HUB_VIEW_TYPE = 'conflict-manager-hub';
 export const CONFLICT_HUB_VIEW_ICON = 'git-compare';
 
 export class ConflictHubView extends ItemView {
-  private settings: ConflictManagerSettings;
+  private settings: IConflictManagerSettings;
+  private configMerger: ConfigMerger;
+  private onMergeConfig: () => void;
   private countEl!: HTMLElement;
   private listEl!: HTMLElement;
+  private mergeButton!: HTMLElement;
+  private mergeBadge!: HTMLElement;
+  private configScanId = 0;
 
-  constructor(leaf: WorkspaceLeaf, settings: ConflictManagerSettings) {
+  constructor(
+    leaf: WorkspaceLeaf,
+    settings: IConflictManagerSettings,
+    configMerger: ConfigMerger,
+    onMergeConfig: () => void,
+  ) {
     super(leaf);
     this.settings = settings;
+    this.configMerger = configMerger;
+    this.onMergeConfig = onMergeConfig;
   }
 
   getViewType() {
@@ -35,10 +48,11 @@ export class ConflictHubView extends ItemView {
     const header = container.createDiv({ cls: 'header' });
     this.countEl = header.createDiv({ cls: 'count' });
 
-    const mergeButton = header.createEl('button', { cls: 'clickable-icon' });
-    setIcon(mergeButton, 'folder-cog');
-    setTooltip(mergeButton, 'Merge config conflicts', { delay: 300 });
-    mergeButton.onclick = () => new Notice('Conflict manager: config merge is coming soon..');
+    this.mergeButton = header.createEl('button', { cls: 'clickable-icon merge-button' });
+    setIcon(this.mergeButton, 'folder-cog');
+    this.mergeBadge = this.mergeButton.createSpan({ cls: 'merge-badge' });
+    this.mergeBadge.hide();
+    this.mergeButton.onclick = () => this.onMergeConfig();
 
     const refreshButton = header.createEl('button', { cls: 'clickable-icon' });
     setIcon(refreshButton, 'refresh-cw');
@@ -58,9 +72,12 @@ export class ConflictHubView extends ItemView {
   refresh() {
     if (!this.listEl) return;
 
-    this.listEl.empty();
-
     const pattern = this.settings.conflictFilePattern?.trim() ?? '';
+
+    this.mergeButton.toggle(this.settings.configConflicts);
+    if (this.settings.configConflicts) void this.updateConfigCount(pattern);
+
+    this.listEl.empty();
 
     if (!pattern) {
       this.countEl.setText('Pattern not set');
@@ -97,5 +114,26 @@ export class ConflictHubView extends ItemView {
       setTooltip(item, file.path, { delay: 300 });
       item.onclick = () => void this.app.workspace.getLeaf(false).openFile(file);
     });
+  }
+
+  private async updateConfigCount(pattern: string) {
+    const scanId = ++this.configScanId;
+    let count = 0;
+
+    try {
+      count = (await this.configMerger.findConflicts(pattern)).length;
+    } catch (error) {
+      console.error(error);
+    }
+
+    if (scanId !== this.configScanId) return;
+
+    this.mergeBadge.setText(String(count));
+    this.mergeBadge.toggle(count > 0);
+    setTooltip(
+      this.mergeButton,
+      count > 0 ? `Merge config conflicts (${count})` : 'No config conflicts',
+      { delay: 300 },
+    );
   }
 }

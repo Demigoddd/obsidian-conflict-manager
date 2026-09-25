@@ -1,19 +1,19 @@
 import { ItemView, WorkspaceLeaf, TFile, setIcon, Notice } from 'obsidian';
 import { UnifiedDiff } from './components/unified-diff';
 import { DeleteConfirmModal } from './components/delete-confirm-modal';
-import { ConflictManagerSettings } from './settings';
+import { IConflictManagerSettings } from './settings';
 
 export const CONFLICT_MANAGER_VIEW_TYPE = 'conflict-manager-view';
 
 export class ConflictManagerView extends ItemView {
-  private settings: ConflictManagerSettings;
+  private settings: IConflictManagerSettings;
   private mainFile: TFile | null = null;
   private conflictFiles: TFile[] = [];
   private currentIdx: number = -1;
   private onConflictsUpdated: ((conflictFiles: TFile[]) => void) | null = null;
   private updateNavInfo: () => void;
 
-  constructor(leaf: WorkspaceLeaf, settings: ConflictManagerSettings) {
+  constructor(leaf: WorkspaceLeaf, settings: IConflictManagerSettings) {
     super(leaf);
     this.settings = settings;
     this.updateNavInfo = () => {};

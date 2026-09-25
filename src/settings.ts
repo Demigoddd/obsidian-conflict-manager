@@ -1,9 +1,10 @@
 import { App, ColorComponent, PluginSettingTab, Setting, debounce } from 'obsidian';
 import ConflictManager from './main';
 
-export interface ConflictManagerSettings {
+export interface IConflictManagerSettings {
   conflictFilePattern: string;
   showStatusBarIndicator: boolean;
+  configConflicts: boolean;
   diffDeleteColorLight: string;
   diffInsertColorLight: string;
   diffDeleteColorDark: string;
@@ -11,9 +12,10 @@ export interface ConflictManagerSettings {
 }
 
 // Colors match the Obsidian defaults of --color-red / --color-green per theme
-export const DEFAULT_SETTINGS: ConflictManagerSettings = {
+export const DEFAULT_SETTINGS: IConflictManagerSettings = {
   conflictFilePattern: 'conflict',
   showStatusBarIndicator: true,
+  configConflicts: false,
   diffDeleteColorLight: '#e93147',
   diffInsertColorLight: '#08b94e',
   diffDeleteColorDark: '#fb464c',
@@ -67,6 +69,28 @@ export class ConflictManagerSettingTab extends PluginSettingTab {
       .addToggle((toggle) =>
         toggle.setValue(this.plugin.settings.showStatusBarIndicator).onChange(async (value) => {
           this.plugin.settings.showStatusBarIndicator = value;
+          this.debouncedSave();
+          this.debouncedUpdate();
+        }),
+      );
+
+    new Setting(containerEl)
+      .setName('Config conflicts')
+      .setDesc(
+        createFragment((frag) => {
+          frag.appendText(
+            'Adds a command that finds conflict copies of settings, plugin data, themes and CSS snippets in the config folder and merges them the way Obsidian Sync does. Only needed with third-party sync (Dropbox, Google Drive, Syncthing, etc.).',
+          );
+          frag.createEl('br');
+          frag.createSpan({
+            cls: 'conflict-manager-warning',
+            text: 'Warning: merging overwrites your config files, which may contain sensitive data such as tokens. Conflict copies are moved to trash after merging.',
+          });
+        }),
+      )
+      .addToggle((toggle) =>
+        toggle.setValue(this.plugin.settings.configConflicts).onChange(async (value) => {
+          this.plugin.settings.configConflicts = value;
           this.debouncedSave();
           this.debouncedUpdate();
         }),

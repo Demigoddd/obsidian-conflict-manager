@@ -2,29 +2,33 @@ import {
   Plugin,
   TFile,
   EditableFileView,
+  Events,
   FileView,
   WorkspaceLeaf,
   Notice,
   debounce,
 } from 'obsidian';
-import { DEFAULT_SETTINGS, ConflictManagerSettings, ConflictManagerSettingTab } from './settings';
+import { DEFAULT_SETTINGS, IConflictManagerSettings, ConflictManagerSettingTab } from './settings';
 import { ConflictManagerView, CONFLICT_MANAGER_VIEW_TYPE } from './view';
 import { ConflictHubView, CONFLICT_HUB_VIEW_TYPE, CONFLICT_HUB_VIEW_ICON } from './hub';
 import { ConflictManagerNotifier } from './notifier';
 import { ConflictManagerIndicator } from './indicator';
 import { findConflictFiles } from './utils';
+import { IConfigMergePlan, ConfigMerger } from './utils/config-merge';
+import { ConfigMergeModal } from './components/config-merge-modal';
 
 export default class ConflictManager extends Plugin {
-  settings!: ConflictManagerSettings;
+  settings!: IConflictManagerSettings;
   notifier!: ConflictManagerNotifier;
   indicator!: ConflictManagerIndicator;
+  private configMerger = new ConfigMerger(this.app);
   private debouncedIndicatorUpdate = debounce(() => this.refreshIndicators(), 500, true);
 
   async onload() {
     // Setting
     this.settings = {
       ...DEFAULT_SETTINGS,
-      ...((await this.loadData()) as Partial<ConflictManagerSettings>),
+      ...((await this.loadData()) as Partial<IConflictManagerSettings>),
     };
     this.addSettingTab(new ConflictManagerSettingTab(this.app, this));
 
@@ -34,6 +38,22 @@ export default class ConflictManager extends Plugin {
     this.registerEvent(this.app.vault.on('delete', () => this.debouncedIndicatorUpdate()));
     this.registerEvent(this.app.vault.on('rename', () => this.debouncedIndicatorUpdate()));
 
+    // Config files are not indexed, only the undocumented "raw" event reports their changes
+    this.registerEvent(
+      (this.app.vault as Events).on('raw', (path: unknown) => {
+        if (
+          this.settings.configConflicts &&
+          typeof path === 'string' &&
+          ConfigMerger.isConflictPath(
+            path,
+            this.app.vault.configDir,
+            this.settings.conflictFilePattern,
+          )
+        )
+          this.debouncedIndicatorUpdate();
+      }),
+    );
+
     // Conflict view
     this.registerView(
       CONFLICT_MANAGER_VIEW_TYPE,
@@ -41,7 +61,16 @@ export default class ConflictManager extends Plugin {
     );
 
     // Conflict hub
-    this.registerView(CONFLICT_HUB_VIEW_TYPE, (leaf) => new ConflictHubView(leaf, this.settings));
+    this.registerView(
+      CONFLICT_HUB_VIEW_TYPE,
+      (leaf) =>
+        new ConflictHubView(
+          leaf,
+          this.settings,
+          this.configMerger,
+          () => void this.mergeConfigConflicts(),
+        ),
+    );
     this.addRibbonIcon(CONFLICT_HUB_VIEW_ICON, 'Conflict hub', () => void this.activateHub());
 
     // Commands
@@ -70,6 +99,15 @@ export default class ConflictManager extends Plugin {
       id: 'open-conflict-hub',
       name: 'Open conflict hub',
       callback: () => void this.activateHub(),
+    });
+    this.addCommand({
+      id: 'merge-config-conflicts',
+      name: 'Merge conflicts in config files',
+      checkCallback: (checking: boolean) => {
+        if (!this.settings.configConflicts) return false;
+        if (!checking) void this.mergeConfigConflicts();
+        return true;
+      },
     });
 
     // Conflict notifier
@@ -136,6 +174,27 @@ export default class ConflictManager extends Plugin {
     await leaf.setViewState({ type: CONFLICT_HUB_VIEW_TYPE, active: true });
     await workspace.revealLeaf(leaf);
     (leaf.view as ConflictHubView).refresh();
+  }
+
+  async mergeConfigConflicts() {
+    let plans: IConfigMergePlan[];
+
+    try {
+      const conflicts = await this.configMerger.findConflicts(this.settings.conflictFilePattern);
+
+      plans = await Promise.all(conflicts.map((conflict) => this.configMerger.plan(conflict)));
+    } catch (error) {
+      console.error(error);
+      new Notice('Conflict manager: failed to scan config files');
+      return;
+    }
+
+    if (plans.length === 0) {
+      new Notice('Conflict manager: no conflicts found in config files');
+      return;
+    }
+
+    new ConfigMergeModal(this.app, this.configMerger, plans).open();
   }
 
   refreshDiffColors() {

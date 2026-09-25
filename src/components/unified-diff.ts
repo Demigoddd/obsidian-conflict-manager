@@ -2,7 +2,7 @@ import { diffLines, diffChars } from 'diff';
 
 const CONTEXT_LINES = 2;
 
-interface Row {
+interface IRow {
   type: 'delete' | 'insert' | 'unchanged';
   text: string;
   mainNumber: number | null;
@@ -18,8 +18,8 @@ export class UnifiedDiff {
     this.paint(container, rows);
   }
 
-  private static buildRows(mainText: string, conflictText: string): Row[] {
-    const rows: Row[] = [];
+  private static buildRows(mainText: string, conflictText: string): IRow[] {
+    const rows: IRow[] = [];
     const parts = diffLines(mainText, conflictText);
     let m = 1,
       c = 1,
@@ -84,7 +84,7 @@ export class UnifiedDiff {
     return rows;
   }
 
-  private static paint(wrap: HTMLElement, rows: Row[]): void {
+  private static paint(wrap: HTMLElement, rows: IRow[]): void {
     const show = new Set<number>();
     rows.forEach((r, i) => {
       if (r.type !== 'unchanged') {
@@ -114,7 +114,7 @@ export class UnifiedDiff {
     }
   }
 
-  private static paintRow(parent: HTMLElement, row: Row): void {
+  private static paintRow(parent: HTMLElement, row: IRow): void {
     const el = parent.createDiv({ cls: `row row-${row.type}` });
 
     el.createSpan({ cls: 'number', text: row.mainNumber != null ? String(row.mainNumber) : '' });
@@ -149,7 +149,7 @@ export class UnifiedDiff {
     });
   }
 
-  private static paintCollapse(wrap: HTMLElement, hidden: Row[]): void {
+  private static paintCollapse(wrap: HTMLElement, hidden: IRow[]): void {
     const el = wrap.createDiv({ cls: 'collapse' });
 
     el.createSpan({ cls: 'collapse-dots', text: '•••' });
