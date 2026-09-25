@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-09-25
+
+### Fixed
+
+- Banners are shown again at startup when the Conflict Hub sits in a background sidebar tab.
+- After the last conflict copy is deleted, the diff view keeps its navigation and can show the next review.
+- Deleting a copy no longer puts a banner on a different note opened in the same tab.
+- Switching between prev/next quickly no longer shows the diff twice.
+- The banner stays visible after switching between editing and reading mode.
+- The diff refreshes when the copy or a canvas/base file changes, not only when a markdown note changes.
+- Diff colors work in popout windows and are no longer left on the page after the plugin is disabled.
+
 ## [1.4.1] - 2026-09-25
 
 ### Fixed
